@@ -231,6 +231,7 @@ tr.row-pend{background:#FEF2F2}tr.row-pend:hover{background:#FEE2E2}
     <div class="nav-sec">Cadastros</div>
     <div class="nav-item" onclick="nav('medicos',this)"><span class="nav-ic">👨‍⚕️</span>Médicos<span class="nb ok" id="nb-med">0</span></div>
     <div class="nav-sec">Relatórios</div>
+    <div class="nav-item" onclick="nav('comprovantes',this)"><span class="nav-ic">🧾</span>Comprovantes<span class="nb ok" id="nb-comp">0</span></div>
     <div class="nav-item" onclick="nav('relatorios',this)"><span class="nav-ic">📈</span>Relatórios</div>
     <div class="nav-item" onclick="nav('resumos',this)"><span class="nav-ic">📋</span>Por período</div>
     <div class="nav-sec">Sistema</div>
@@ -314,6 +315,39 @@ tr.row-pend{background:#FEF2F2}tr.row-pend:hover{background:#FEE2E2}
 <div class="page page-wrap" id="page-medicos">
   <div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-primary" onclick="abrirMedico()">+ Cadastrar médico</button></div>
   <div class="med-cards" id="med-cards"></div>
+</div>
+
+<!-- COMPROVANTES -->
+<div class="page page-wrap" id="page-comprovantes">
+  <div class="card">
+    <div class="tbar">
+      <span class="tbar-ttl">Comprovantes gerados</span>
+      <input class="srch" type="text" id="busca-comp" placeholder="🔍 Buscar médico…" oninput="renderComprovantes()">
+      <select class="flt" id="flt-comp-status" onchange="renderComprovantes()">
+        <option value="">Todos</option>
+        <option value="pendente">Pendente envio</option>
+        <option value="enviado">Enviado</option>
+      </select>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>Médico</th><th>NF</th><th>Tomador</th><th>Competência</th><th>Valor repasse</th><th>Data pag.</th><th>Link</th><th>WhatsApp</th><th>Status</th><th></th></tr></thead>
+      <tbody id="tb-comp"></tbody>
+    </table></div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="card-hd"><h3>📂 Cruzamento com extrato bancário</h3></div>
+    <div class="card-bd">
+      <p style="font-size:13px;color:var(--gray2);margin-bottom:14px">Faça upload do extrato bancário (.CSV ou .OFX) para cruzar automaticamente com as notas fiscais recebidas.</p>
+      <div style="border:2px dashed var(--border);border-radius:var(--radius-lg);padding:32px;text-align:center;cursor:pointer;transition:all .2s" id="drop-zone" onclick="document.getElementById('extrato-file').click()" ondragover="event.preventDefault();this.style.borderColor='var(--g4)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleExtratoFile(event)">
+        <div style="font-size:32px;margin-bottom:8px">📄</div>
+        <div style="font-size:14px;font-weight:600;color:var(--gray1)">Arraste o extrato aqui ou clique para selecionar</div>
+        <div style="font-size:12px;color:var(--gray3);margin-top:4px">Formatos aceitos: CSV, OFX, TXT</div>
+        <input type="file" id="extrato-file" accept=".csv,.ofx,.txt" style="display:none" onchange="processarExtrato(this.files[0])">
+      </div>
+      <div id="extrato-resultado" style="margin-top:14px"></div>
+    </div>
+  </div>
 </div>
 
 <!-- RELATÓRIOS -->
@@ -525,7 +559,7 @@ function abrir(id){document.getElementById(id).classList.add('open');}
 function fechar(id){document.getElementById(id).classList.remove('open');}
 function confirmar(msg,cb){document.getElementById('conf-msg').textContent=msg;document.getElementById('btn-conf').onclick=()=>{fechar('mo-conf');cb();};abrir('mo-conf');}
 
-const pgTitles={dashboard:'Dashboard',lancamentos:'Notas fiscais',pendencias:'Pendências',adiantamentos:'Adiantamentos',cashback:'Cashback',medicos:'Médicos',relatorios:'Relatório de faturamento',resumos:'Por período',config:'Configurações'};
+const pgTitles={dashboard:'Dashboard',lancamentos:'Notas fiscais',pendencias:'Pendências',adiantamentos:'Adiantamentos',cashback:'Cashback',medicos:'Médicos',comprovantes:'Comprovantes',relatorios:'Relatório de faturamento',resumos:'Por período',config:'Configurações'};
 function nav(name,el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -533,6 +567,7 @@ function nav(name,el){
   el.classList.add('active');
   document.getElementById('pg-title').textContent=pgTitles[name]||name;
   if(name==='dashboard')renderCharts();
+  if(name==='comprovantes'){renderComprovantes();}
   if(name==='resumos'){renderResumos();}
   if(name==='pendencias')renderPend();
   if(name==='adiantamentos')renderAdiantamentos();
@@ -1080,10 +1115,129 @@ function exportarExcel(){
   XLSX.writeFile(wb2,'aunordmed_financeiro.xlsx');toast('Exportado!');
 }
 
+let comprovantesLista=[];
+async function carregarComprovantes(){
+  try{comprovantesLista=await sGet('comprovantes','order=criado_em.desc');}catch(e){comprovantesLista=[];}
+}
+function renderComprovantes(){
+  const busca=document.getElementById('busca-comp')?.value.toLowerCase()||'';
+  const fs=document.getElementById('flt-comp-status')?.value||'';
+  const f=comprovantesLista.filter(c=>(!busca||c.medico_nome?.toLowerCase().includes(busca)||c.medico_crm?.toLowerCase().includes(busca))&&(!fs||(fs==='enviado'&&c.whatsapp_enviado)||(fs==='pendente'&&!c.whatsapp_enviado)));
+  document.getElementById('nb-comp').textContent=comprovantesLista.length;
+  const tbody=document.getElementById('tb-comp');
+  if(!f.length){tbody.innerHTML=`<tr><td colspan="10"><div class="empty"><div class="empty-ic">🧾</div><h4>Nenhum comprovante</h4><p>São gerados automaticamente ao cadastrar notas</p></div></td></tr>`;return;}
+  tbody.innerHTML=f.map((c,i)=>{
+    const link=`${cfg.baseUrl}?token=${c.token}`;
+    const med=medicos.find(m=>m.nome===c.medico_nome);
+    const tel=med?.telefone_whatsapp||med?.telefone||'';
+    return`<tr>
+      <td class="mono" style="color:var(--gray3)">${i+1}</td>
+      <td style="font-weight:500;color:var(--g2)">${c.medico_nome||'—'}</td>
+      <td class="mono">${c.dados_extras?.nf||'—'}</td>
+      <td>${c.tomador||'—'}</td>
+      <td class="mono">${fmtMes(c.competencia)}</td>
+      <td class="mono" style="font-weight:600;color:var(--g2)">${brl(c.valor_repasse)}</td>
+      <td class="mono">${fmtDt(c.data_pagamento)}</td>
+      <td><button class="btn btn-ghost btn-xs" onclick="navigator.clipboard.writeText('${link}').then(()=>toast('Link copiado!'))">🔗 Copiar</button><button class="btn btn-ghost btn-xs" style="margin-left:4px" onclick="window.open('${link}','_blank')">↗ Abrir</button></td>
+      <td>${tel?`<button class="btn btn-wpp btn-xs" onclick="enviarComprovante('${c.token}','${c.medico_nome}','${tel}',${c.valor_repasse},'${c.data_pagamento||''}','${c.competencia||''}','${c.tomador||''}')">💬 Enviar</button>`:`<span style="color:var(--gray3);font-size:10px">Sem tel.</span>`}</td>
+      <td><span class="badge ${c.whatsapp_enviado?'b-pag':'b-emit'}">${c.whatsapp_enviado?'✓ Enviado':'Pendente'}</span></td>
+      <td><button class="btn btn-danger btn-xs" onclick="excluirComp('${c.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function excluirComp(id){
+  if(!confirm('Excluir este comprovante? O link deixará de funcionar.'))return;
+  try{
+    await sDel('comprovantes',id);
+    toast('Comprovante excluído.');
+    await carregarComprovantes();renderComprovantes();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+async function excluirComp(id){
+  if(!confirm('Excluir este comprovante? O link deixará de funcionar.'))return;
+  try{
+    await sDel('comprovantes',id);
+    toast('Comprovante excluído.');
+    await carregarComprovantes();renderComprovantes();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+async function enviarComprovante(token,nome,tel,valor,data,comp,tomador){
+  const link=`${cfg.baseUrl}?token=${token}`;
+  const msg=`🏥 *AunordMED Financeiro*\n\nOlá, Dr(a). *${nome}*!\n\nSeu comprovante de repasse está disponível.\n\n💰 *Valor:* ${brl(valor)}\n📅 *Data:* ${fmtDt(data)}\n🏢 *Tomador:* ${tomador}\n📅 *Competência:* ${fmtMes(comp)}\n\n📄 Acesse seu comprovante:\n${link}\n\n_AunordMED — Gestão financeira médica_`;
+  
+  // Abrir modal de edição da mensagem
+  const msgEdit=prompt('Edite a mensagem antes de enviar:',msg);
+  if(msgEdit===null)return;
+  
+  if(cfg.wppUrl&&cfg.wppKey){
+    const ok=await enviarWhatsApp(tel,msgEdit);
+    if(ok){
+      toast('WhatsApp enviado!','wpp');
+      const comp2=comprovantesLista.find(c=>c.token===token);
+      if(comp2){await sPatch('comprovantes',comp2.id,{whatsapp_enviado:true}).catch(()=>{});}
+      await carregarComprovantes();renderComprovantes();
+    }else toast('Falha no envio.','err');
+  }else{
+    window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msgEdit)}`,'_blank');
+    const comp2=comprovantesLista.find(c=>c.token===token);
+    if(comp2){await sPatch('comprovantes',comp2.id,{whatsapp_enviado:true}).catch(()=>{});}
+    await carregarComprovantes();renderComprovantes();
+  }
+}
+
+function handleExtratoFile(e){e.preventDefault();const f=e.dataTransfer.files[0];if(f)processarExtrato(f);}
+function processarExtrato(file){
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const text=e.target.result;
+    const linhas=text.split('\n').filter(l=>l.trim());
+    const resultados=[];
+    let cruzados=0,naoEncontrados=0;
+    linhas.forEach(linha=>{
+      // Detectar valores monetários no extrato
+      const valorMatch=linha.match(/[\d]+[.,][\d]{2}/g);
+      if(!valorMatch)return;
+      const valor=parseFloat(valorMatch[0].replace(',','.'));
+      if(valor<10)return;
+      // Cruzar com notas
+      const nfMatch=notas.find(n=>{
+        const recebido=parseFloat((n.recebido||0).toFixed(2));
+        return Math.abs(recebido-valor)<0.02&&n.status==='Emitida';
+      });
+      if(nfMatch){
+        resultados.push({linha:linha.trim(),valor,nf:nfMatch.nf,status:'encontrada',id:nfMatch.id});
+        cruzados++;
+      }
+    });
+    document.getElementById('extrato-resultado').innerHTML=`
+      <div style="background:var(--g7);border:1px solid var(--g6);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:600;color:var(--g2);margin-bottom:8px">📊 Resultado do cruzamento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div style="background:#fff;border-radius:var(--radius);padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--g2)">${cruzados}</div><div style="font-size:11px;color:var(--gray3)">NFs encontradas</div></div>
+          <div style="background:#fff;border-radius:var(--radius);padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--orange)">${notas.filter(n=>n.status==='Emitida').length-cruzados}</div><div style="font-size:11px;color:var(--gray3)">Ainda pendentes</div></div>
+          <div style="background:#fff;border-radius:var(--radius);padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blue)">${linhas.length}</div><div style="font-size:11px;color:var(--gray3)">Linhas no extrato</div></div>
+        </div>
+      </div>
+      ${resultados.length?`<div style="font-size:13px;font-weight:600;color:var(--gray1);margin-bottom:8px">NFs identificadas no extrato:</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:var(--g1)"><th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--g6)">NF</th><th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--g6)">Valor</th><th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--g6)">Linha do extrato</th><th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--g6)">Ação</th></tr></thead>
+        <tbody>${resultados.map(r=>`<tr style="border-bottom:1px solid var(--gray6)"><td style="padding:8px 12px;font-family:var(--mono);font-weight:600">${r.nf}</td><td style="padding:8px 12px;font-family:var(--mono);color:var(--g2)">R$ ${brl(r.valor)}</td><td style="padding:8px 12px;font-size:11px;color:var(--gray2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.linha}</td><td style="padding:8px 12px"><button class="btn btn-sm" style="background:var(--g3);color:#fff;font-size:11px;padding:4px 10px" onclick="marcarRecebida('${r.id}')">✓ Marcar recebida</button></td></tr>`).join('')}</tbody>
+      </table>`:
+      '<div style="text-align:center;padding:20px;color:var(--gray3);font-size:13px">Nenhuma NF identificada automaticamente. Verifique o formato do arquivo.</div>'}`;
+  };
+  reader.readAsText(file,'UTF-8');
+}
+async function marcarRecebida(id){
+  try{await sPatch('notas_fiscais',id,{status:'Recebida'});toast('NF marcada como recebida!');await carregarTudo();renderComprovantes();}
+  catch(e){toast('Erro: '+e.message,'err');}
+}
+
 async function init(){
   document.getElementById('tb-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
   document.getElementById('rel-mes').value=new Date().toISOString().substring(0,7);
-  carregarCfg();await carregarTudo();renderCharts();
+  carregarCfg();await Promise.all([carregarTudo(),carregarComprovantes()]);renderCharts();
 }
 init();
 </script>
