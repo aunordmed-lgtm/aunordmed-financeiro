@@ -3,273 +3,530 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AunordMED — Comprovante de Repasse</title>
+<title>AunordMED Financeiro</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 :root{
-  --g1:#0D3D20;--g2:#145C30;--g3:#1A7A3E;--g4:#22994D;--g5:#3DB368;--g6:#A8DCBA;--g7:#E8F5ED;
-  --gray0:#0F172A;--gray1:#1E293B;--gray2:#475569;--gray3:#94A3B8;--gray4:#CBD5E1;--gray5:#E2E8F0;--gray6:#F1F5F9;
-  --blue:#1A56DB;--blue-l:#EBF5FF;
-  --orange:#D97706;--orange-l:#FFFBEB;
-  --red:#DC2626;--red-l:#FEF2F2;
+  --g1:#0D3D20;--g2:#145C30;--g3:#1A7A3E;--g4:#22994D;--g5:#3DB368;--g6:#A8DCBA;--g7:#E8F5ED;--g8:#F2FAF5;
+  --blue:#1A56DB;--blue-l:#EBF5FF;--blue-d:#1342A8;
+  --orange:#D97706;--orange-l:#FFFBEB;--orange-d:#B45309;
+  --red:#DC2626;--red-l:#FEF2F2;--red-d:#B91C1C;
+  --purple:#7C3AED;--purple-l:#F5F3FF;--purple-d:#6D28D9;
+  --teal:#0891B2;--teal-l:#E0F7FA;
+  --gray0:#0F172A;--gray1:#1E293B;--gray2:#475569;--gray3:#94A3B8;--gray4:#CBD5E1;--gray5:#E2E8F0;--gray6:#F1F5F9;--gray7:#F8FAFC;
   --surface:#fff;--bg:#F0F4F2;--border:#D4E6DA;
-  --radius:10px;--radius-lg:14px;--radius-xl:20px;
+  --radius:8px;--radius-lg:12px;--radius-xl:16px;
   --mono:'JetBrains Mono',monospace;--sans:'Inter',sans-serif;
-  --sh:0 1px 3px rgba(0,0,0,.06);--sh-md:0 8px 24px rgba(0,0,0,.1);
+  --sh:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --sh-md:0 4px 16px rgba(0,0,0,.1);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:100vh;padding:20px}
-
-/* LOADING */
-.lov{position:fixed;inset:0;background:#fff;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:14px;color:var(--gray2)}
-.lov.hide{display:none}
-.spin-big{width:36px;height:36px;border:3px solid var(--g6);border-top-color:var(--g4);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* WRAPPER */
-.wrapper{max-width:680px;margin:0 auto}
-
-/* HEADER CARD */
-.header-card{background:var(--g1);border-radius:var(--radius-xl);padding:28px 32px;margin-bottom:16px;position:relative;overflow:hidden}
-.header-card::before{content:'';position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.04)}
-.header-card::after{content:'';position:absolute;bottom:-60px;left:-20px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.03)}
-.hc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.logo-area{display:flex;flex-direction:column}
-.logo-name{font-size:22px;font-weight:700;color:#fff;letter-spacing:-.3px}
-.logo-name span{color:var(--g5)}
-.logo-sub{font-size:10px;color:var(--g6);letter-spacing:.5px;margin-top:2px}
-.doc-badge{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--radius);padding:6px 14px;font-size:11px;color:rgba(255,255,255,.7);font-family:var(--mono)}
-.medico-info{display:flex;align-items:center;gap:14px}
-.avatar{width:52px;height:52px;border-radius:50%;background:var(--g4);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0;border:2px solid rgba(255,255,255,.2)}
-.medico-nome{font-size:20px;font-weight:700;color:#fff;line-height:1.2}
-.medico-crm{font-size:12px;color:var(--g6);margin-top:3px}
-.medico-esp{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
-.status-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:600;margin-top:8px}
-.sb-pago{background:rgba(61,179,104,.2);color:#6EE7A0;border:1px solid rgba(61,179,104,.3)}
-.sb-pendente{background:rgba(217,119,6,.2);color:#FCD34D;border:1px solid rgba(217,119,6,.3)}
-
-/* REPASSE PRINCIPAL */
-.repasse-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:24px 28px;margin-bottom:16px;box-shadow:var(--sh)}
-.rc-label{font-size:11px;font-weight:600;color:var(--gray3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.rc-valor{font-size:40px;font-weight:700;font-family:var(--mono);color:var(--g2);line-height:1}
-.rc-valor span{font-size:16px;font-weight:500;color:var(--gray3);margin-right:4px}
-.rc-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:20px}
-.rc-item{background:var(--gray6);border-radius:var(--radius);padding:12px 14px}
-.rc-item-lbl{font-size:10px;font-weight:600;color:var(--gray3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-.rc-item-val{font-size:13px;font-weight:600;color:var(--gray1);font-family:var(--mono)}
-.rc-pix{background:var(--g7);border:1px solid var(--g6);border-radius:var(--radius);padding:12px 14px;margin-top:12px;display:flex;align-items:center;gap:10px}
-.pix-icon{width:32px;height:32px;border-radius:8px;background:var(--g4);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.pix-lbl{font-size:10px;font-weight:600;color:var(--g3);text-transform:uppercase;letter-spacing:.4px}
-.pix-val{font-size:13px;font-weight:600;color:var(--g2);font-family:var(--mono)}
-
-/* HISTÓRICO */
-.hist-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;margin-bottom:16px;box-shadow:var(--sh)}
-.hist-hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.hist-hd h3{font-size:14px;font-weight:600;color:var(--gray0);display:flex;align-items:center;gap:8px}
-.hist-filtro{display:flex;gap:8px;align-items:center}
-.hist-filtro select{height:30px;border:1.5px solid var(--border);border-radius:var(--radius);padding:0 10px;font-family:var(--sans);font-size:12px;color:var(--gray1);background:var(--gray6)}
-.hist-table{width:100%;border-collapse:collapse;font-size:12.5px}
-.hist-table thead tr{background:var(--g1)}
-.hist-table th{padding:9px 16px;text-align:left;font-size:9px;font-weight:700;color:var(--g6);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
-.hist-table td{padding:10px 16px;border-bottom:1px solid var(--gray6);vertical-align:middle}
-.hist-table tbody tr:last-child td{border-bottom:none}
-.hist-table tbody tr:hover{background:var(--g7)}
-.mono{font-family:var(--mono)}
-.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600}
-.b-pag{background:var(--g7);color:var(--g2);border:1px solid var(--g6)}
-.b-emit{background:var(--orange-l);color:var(--orange);border:1px solid #FDE68A}
-.b-rec{background:var(--blue-l);color:var(--blue);border:1px solid #93C5FD}
-.hist-total{padding:12px 16px;background:var(--g7);border-top:1px solid var(--g6);display:flex;justify-content:space-between;align-items:center;font-size:13px}
-.hist-total span{font-weight:500;color:var(--gray2)}
-.hist-total strong{font-family:var(--mono);font-weight:700;color:var(--g1);font-size:16px}
-.hist-empty{text-align:center;padding:32px;color:var(--gray3)}
-.hist-empty-ic{font-size:28px;margin-bottom:8px}
-
-/* RESUMO MÊS */
-.resumo-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
-.res-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;box-shadow:var(--sh)}
-.res-lbl{font-size:10px;font-weight:600;color:var(--gray3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
-.res-val{font-size:18px;font-weight:700;font-family:var(--mono);color:var(--gray0)}
-.res-sub{font-size:10px;color:var(--gray3);margin-top:2px}
-
-/* AÇÕES */
-.acoes-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:20px 24px;margin-bottom:16px;box-shadow:var(--sh)}
-.acoes-card h3{font-size:13px;font-weight:600;color:var(--gray2);margin-bottom:14px;text-transform:uppercase;letter-spacing:.4px}
-.acoes-row{display:flex;gap:10px;flex-wrap:wrap}
-.btn{cursor:pointer;border:none;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;padding:10px 18px;transition:all .15s;display:inline-flex;align-items:center;gap:7px}
+html,body{height:100%;font-family:var(--sans);background:var(--bg);color:var(--gray0);font-size:14px;line-height:1.5}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:230px;background:var(--g1);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:var(--sh)}
+.page-wrap{flex:1;overflow-y:auto;padding:20px}
+/* SIDEBAR */
+.sidebar-logo{padding:16px 14px 14px;border-bottom:1px solid rgba(255,255,255,.1)}
+.logo-row{display:flex;align-items:center;gap:9px}
+.logo-svg{width:30px;height:30px;flex-shrink:0}
+.logo-txt{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.2px}
+.logo-txt span{color:var(--g5)}
+.logo-sub{font-size:9px;color:var(--g6);letter-spacing:.5px;margin-top:2px;margin-left:39px}
+nav{padding:8px 6px;flex:1}
+.nav-sec{font-size:9px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px;padding:10px 8px 3px}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--radius);cursor:pointer;color:rgba(255,255,255,.58);font-size:12.5px;font-weight:500;transition:all .15s;margin-bottom:1px;user-select:none;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.active{background:var(--g3);color:#fff;font-weight:600}
+.nav-item.active::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:55%;background:var(--g5);border-radius:0 2px 2px 0}
+.nav-ic{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.nb{margin-left:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;background:var(--red);color:#fff;min-width:18px;text-align:center}
+.nb.ok{background:var(--g4)}.nb.blue{background:var(--blue)}.nb.purple{background:var(--purple)}
+.sidebar-bot{padding:10px 6px;border-top:1px solid rgba(255,255,255,.08)}
+.sidebar-ver{font-size:9px;color:rgba(255,255,255,.25);text-align:center;padding:3px}
+/* TOPBAR */
+.tb-title{font-size:14px;font-weight:600;color:var(--gray0)}
+.tb-right{display:flex;align-items:center;gap:7px}
+.tb-date{font-size:11px;color:var(--gray3);font-family:var(--mono)}
+/* BTNS */
+.btn{cursor:pointer;border:none;border-radius:var(--radius);font-family:var(--sans);font-size:12.5px;font-weight:500;padding:7px 14px;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .btn:active{transform:scale(.97)}
-.btn-wpp{background:#25D366;color:#fff;flex:1}.btn-wpp:hover{background:#1DA851}
-.btn-copy{background:var(--g3);color:#fff;flex:1}.btn-copy:hover{background:var(--g2)}
-.btn-print{background:var(--gray6);color:var(--gray1);border:1px solid var(--border)}.btn-print:hover{background:var(--gray5)}
-.btn-ghost{background:transparent;color:var(--gray2);border:1px solid var(--border)}.btn-ghost:hover{background:var(--gray6)}
-.btn-sm{font-size:11px;padding:5px 11px}
 .btn-primary{background:var(--g3);color:#fff}.btn-primary:hover{background:var(--g2)}
-.link-display{background:var(--gray6);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-size:11px;font-family:var(--mono);color:var(--gray2);word-break:break-all;margin-top:10px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-.link-display span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-
-/* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;background:var(--g1);color:#fff;padding:11px 18px;border-radius:var(--radius-lg);font-size:13px;font-weight:500;z-index:999;transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);border-left:4px solid var(--g5);max-width:280px;box-shadow:var(--sh-md)}
-.toast.show{transform:translateY(0);opacity:1}
-.toast.wpp{background:#075E54;border-left-color:#25D366}
-.toast.err{background:#7F1D1D;border-left-color:var(--red)}
-
-/* EDITAR */
-.edit-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
-.edit-overlay.open{opacity:1;pointer-events:all}
-.edit-box{background:var(--surface);border-radius:var(--radius-xl);width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh-md);transform:translateY(10px);transition:transform .2s}
-.edit-overlay.open .edit-box{transform:translateY(0)}
-.edit-hd{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.edit-hd h3{font-size:15px;font-weight:600}
-.edit-close{background:none;border:none;cursor:pointer;color:var(--gray3);font-size:18px}
-.edit-body{padding:18px}
-.edit-ft{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
-.fld{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+.btn-outline{background:transparent;color:var(--g3);border:1.5px solid var(--g4)}.btn-outline:hover{background:var(--g8)}
+.btn-ghost{background:transparent;color:var(--gray2);border:1px solid var(--border)}.btn-ghost:hover{background:var(--gray6)}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:var(--red-d)}
+.btn-blue{background:var(--blue);color:#fff}.btn-blue:hover{background:var(--blue-d)}
+.btn-purple{background:var(--purple);color:#fff}.btn-purple:hover{background:var(--purple-d)}
+.btn-wpp{background:#25D366;color:#fff}.btn-wpp:hover{background:#1DA851}
+.btn-orange{background:var(--orange);color:#fff}.btn-orange:hover{background:var(--orange-d)}
+.btn-sm{font-size:12px;padding:5px 11px}.btn-xs{font-size:11px;padding:3px 8px}
+/* CARD */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--sh)}
+.card-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.card-hd h3{font-size:13px;font-weight:600;color:var(--gray1);display:flex;align-items:center;gap:7px}
+.card-bd{padding:16px}
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.kpi-bar{position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-ic{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:8px}
+.kpi-lbl{font-size:10px;font-weight:600;color:var(--gray3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.kpi-val{font-size:18px;font-weight:700;font-family:var(--mono);color:var(--gray0);line-height:1.1}
+.kpi-sub{font-size:10px;color:var(--gray3);margin-top:3px}
+/* STATUS STRIP */
+.ss-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.ss{border-radius:var(--radius-lg);padding:12px 14px;display:flex;gap:12px;align-items:center}
+.ss-n{font-size:26px;font-weight:700;font-family:var(--mono);line-height:1}
+.ss-lbl{font-size:12px;font-weight:600}.ss-sub{font-size:10px;opacity:.7;margin-top:1px}
+.ss-emit{background:var(--orange-l);color:var(--orange-d);border:1px solid #FDE68A}
+.ss-rec{background:var(--blue-l);color:var(--blue-d);border:1px solid #93C5FD}
+.ss-pag{background:var(--g7);color:var(--g2);border:1px solid var(--g6)}
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.chart-full{grid-column:1/-1}
+/* FORMS */
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.fg-full{grid-column:1/-1}
+.fld{display:flex;flex-direction:column;gap:3px}
 .fld label{font-size:10px;font-weight:700;color:var(--gray2);text-transform:uppercase;letter-spacing:.4px}
-input,select,textarea{border:1.5px solid var(--gray5);border-radius:var(--radius);padding:0 10px;font-family:var(--sans);font-size:13px;color:var(--gray0);background:var(--gray6);height:38px;width:100%}
+.fld label .req{color:var(--red)}
+input,select,textarea{border:1.5px solid var(--gray5);border-radius:var(--radius);padding:0 10px;font-family:var(--sans);font-size:13px;color:var(--gray0);background:var(--gray7);transition:border-color .15s;width:100%;height:36px}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--g4);background:#fff;box-shadow:0 0 0 3px rgba(34,153,77,.1)}
-textarea{height:auto;padding:9px 10px}
-
-/* FOOTER */
-.footer{text-align:center;padding:20px;font-size:11px;color:var(--gray3)}
-.footer strong{color:var(--gray2)}
-
-@media print{
-  .acoes-card,.edit-overlay,.toast{display:none!important}
-  body{background:#fff;padding:0}
-  .header-card{border-radius:0}
-}
-@media(max-width:500px){
-  .rc-grid{grid-template-columns:1fr 1fr}
-  .resumo-grid{grid-template-columns:1fr 1fr}
-  .acoes-row{flex-direction:column}
-}
+input.inp-money{border-color:var(--blue);background:var(--blue-l);font-weight:600;font-family:var(--mono)}
+textarea{height:auto;padding:8px 10px;resize:vertical}
+.fhint{font-size:10px;color:var(--gray3);margin-top:1px}
+/* COMPUTED */
+.cb-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-top:10px}
+.cb{background:var(--g8);border:1px solid var(--g6);border-radius:var(--radius);padding:9px 11px}
+.cb-lbl{font-size:9px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.cb-val{font-size:14px;font-weight:700;font-family:var(--mono);color:var(--g2)}
+.cb.hl{background:#F0FFF6;border-color:var(--g5)}.cb.hl .cb-val{color:var(--g1)}
+.cb.bl{background:var(--blue-l);border-color:#93C5FD}.cb.bl .cb-lbl{color:var(--blue)}.cb.bl .cb-val{color:var(--blue-d)}
+/* MED PICKER */
+.med-picker{border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-top:8px}
+.med-picker-hd{background:var(--gray6);padding:8px 12px;font-size:11px;font-weight:600;color:var(--gray2);display:flex;justify-content:space-between;border-bottom:1px solid var(--border)}
+.med-list-sel{max-height:180px;overflow-y:auto}
+.med-row{display:grid;grid-template-columns:1fr 110px 110px 30px;gap:6px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--gray6);font-size:12px}
+.med-row:last-child{border-bottom:none}.med-row:hover{background:var(--g8)}
+.med-add-row{padding:7px 12px;border-top:1px solid var(--border)}
+.pct-warn{font-size:11px;padding:5px 12px;background:var(--orange-l);color:var(--orange-d);border-top:1px solid #FDE68A;display:none}
+.pct-warn.show{display:block}
+.rmv-btn{background:none;border:none;cursor:pointer;color:var(--gray3);font-size:14px;padding:2px;border-radius:4px}
+.rmv-btn:hover{color:var(--red);background:var(--red-l)}
+/* TABLES */
+.tbar{padding:10px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:1px solid var(--border)}
+.tbar-ttl{font-size:13px;font-weight:600;flex:1;color:var(--gray0)}
+.srch{height:32px;width:170px;font-size:12px}
+.flt{height:32px;font-size:12px;width:auto}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:var(--g1)}
+th{padding:9px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--g6);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:8px 12px;border-bottom:1px solid var(--g8);vertical-align:middle}
+tbody tr:hover{background:var(--g8)}
+tr:last-child td{border-bottom:none}
+tr.row-emit{background:#FFFBEB}tr.row-emit:hover{background:#FEF3C7}
+tr.row-pend{background:#FEF2F2}tr.row-pend:hover{background:#FEE2E2}
+.mono{font-family:var(--mono)}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:10px;font-weight:600;white-space:nowrap}
+.b-emit{background:var(--orange-l);color:var(--orange-d);border:1px solid #FDE68A}
+.b-rec{background:var(--blue-l);color:var(--blue-d);border:1px solid #93C5FD}
+.b-pag{background:var(--g7);color:var(--g2);border:1px solid var(--g6)}
+.b-pend{background:var(--red-l);color:var(--red-d);border:1px solid #FCA5A5}
+.b-ok{background:var(--g7);color:var(--g2);border:1px solid var(--g6)}
+.tag{display:inline-flex;padding:1px 6px;border-radius:99px;font-size:10px;font-weight:600;background:var(--g7);color:var(--g3);border:1px solid var(--g6)}
+/* MÉDICOS CARDS */
+.med-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--sh)}
+.mc-hd{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.mc-name{font-size:13px;font-weight:600;color:var(--gray0)}
+.mc-crm{font-size:10px;color:var(--gray3)}
+.mc-bd{padding:10px 14px}
+.mc-stat{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--gray6);font-size:11px}
+.mc-stat:last-child{border-bottom:none}
+.msl{color:var(--gray3)}.msv{font-family:var(--mono);font-weight:600}
+.mc-ft{padding:8px 14px;background:var(--gray7);display:flex;gap:6px;justify-content:flex-end;border-top:1px solid var(--border)}
+.ret-tag{padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:var(--g7);color:var(--g2);border:1px solid var(--g6)}
+.pix-tag{padding:1px 7px;border-radius:99px;font-size:10px;font-weight:600;background:var(--teal-l);color:var(--teal);border:1px solid #67E8F9}
+/* PENDÊNCIAS */
+.pend-kpis{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.pend-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--sh)}
+.pend-hd{padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
+.pend-hd h3{font-size:12px;font-weight:600;color:var(--gray1);display:flex;align-items:center;gap:6px}
+/* RELATÓRIO */
+.rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.rel-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+/* CONFIG */
+.cfg-sec{margin-bottom:20px}
+.cfg-sec h4{font-size:11px;font-weight:700;color:var(--gray2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--gray6)}
+.cfg-row:last-child{border-bottom:none}
+.cfg-lbl{font-size:13px;font-weight:500;color:var(--gray0)}.cfg-sub{font-size:10px;color:var(--gray3);margin-top:1px}
+.pct-inp{width:80px;text-align:center;font-family:var(--mono);font-weight:600}
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;opacity:0;pointer-events:none;transition:opacity .2s}
+.mo.open{opacity:1;pointer-events:all}
+.mo-box{background:var(--surface);border-radius:var(--radius-xl);width:100%;max-width:580px;max-height:92vh;display:flex;flex-direction:column;box-shadow:var(--sh-md);transform:translateY(10px);transition:transform .2s}
+.mo.open .mo-box{transform:translateY(0)}
+.mo-box.wide{max-width:680px}.mo-box.sm{max-width:420px}
+.mo-hd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.mo-hd h3{font-size:14px;font-weight:600}
+.mo-close{background:none;border:none;cursor:pointer;color:var(--gray3);font-size:18px;line-height:1;padding:2px;border-radius:6px}
+.mo-close:hover{color:var(--red)}
+.mo-body{padding:18px;overflow-y:auto;flex:1}
+.mo-ft{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+/* TOAST */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--g1);color:#fff;padding:10px 16px;border-radius:var(--radius-lg);font-size:12.5px;font-weight:500;z-index:999;transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);border-left:4px solid var(--g5);max-width:280px;box-shadow:var(--sh-md)}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.err{background:#7F1D1D;border-left-color:var(--red)}
+.toast.wpp{background:#075E54;border-left-color:#25D366}
+/* LOADING */
+.lov{position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:300;display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:13px;color:var(--gray2)}
+.lov.show{display:flex}
+.spin-big{width:30px;height:30px;border:3px solid var(--g6);border-top-color:var(--g3);border-radius:50%;animation:spin .7s linear infinite}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* EMPTY */
+.empty{text-align:center;padding:36px 16px;color:var(--gray3)}
+.empty-ic{font-size:32px;margin-bottom:8px}
+.empty h4{font-size:13px;font-weight:600;color:var(--gray2);margin-bottom:3px}
+.empty p{font-size:11px}
+.page{display:none}.page.active{display:block}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--gray3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;margin-top:14px}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.wpp-preview{background:#075E54;color:#fff;border-radius:var(--radius-lg);padding:14px;font-size:13px;line-height:1.6;white-space:pre-wrap;font-family:var(--sans);margin-top:10px}
+.wpp-bubble{background:#DCF8C6;color:#111;border-radius:12px 12px 0 12px;padding:10px 14px;font-size:13px;line-height:1.6;max-width:340px;margin-left:auto;white-space:pre-wrap}
+/* RELATÓRIO FATURAMENTO */
+.rel-fatura{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rel-card-fat{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border)}
+.rel-card-fat .rfh{padding:10px 14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px}
+.rfh.green{background:var(--g7);color:var(--g2)}.rfh.red{background:var(--red-l);color:var(--red-d)}
 </style>
 </head>
 <body>
-
-<div class="lov" id="lov">
-  <div class="spin-big"></div>
-  <span>Carregando comprovante...</span>
+<div class="lov" id="lov"><div class="spin-big"></div><span id="lov-msg">Carregando...</span></div>
+<div class="app">
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-txt">Aunord<span>MED</span></div>
+    </div>
+    <div class="logo-sub">FINANCEIRO v4</div>
+  </div>
+  <nav>
+    <div class="nav-sec">Principal</div>
+    <div class="nav-item active" onclick="nav('dashboard',this)"><span class="nav-ic">📊</span>Dashboard</div>
+    <div class="nav-item" onclick="nav('lancamentos',this)"><span class="nav-ic">📄</span>Notas fiscais<span class="nb ok" id="nb-nf">0</span></div>
+    <div class="nav-sec">Pendências</div>
+    <div class="nav-item" onclick="nav('pendencias',this)"><span class="nav-ic">🔔</span>Pendências<span class="nb" id="nb-pend">0</span></div>
+    <div class="nav-sec">Financeiro</div>
+    <div class="nav-item" onclick="nav('adiantamentos',this)"><span class="nav-ic">💵</span>Adiantamentos<span class="nb orange" id="nb-adt" style="background:var(--orange)">0</span></div>
+    <div class="nav-item" onclick="nav('cashback',this)"><span class="nav-ic">🎁</span>Cashback<span class="nb purple" id="nb-cb">0</span></div>
+    <div class="nav-sec">Cadastros</div>
+    <div class="nav-item" onclick="nav('medicos',this)"><span class="nav-ic">👨‍⚕️</span>Médicos<span class="nb ok" id="nb-med">0</span></div>
+    <div class="nav-sec">Relatórios</div>
+    <div class="nav-item" onclick="nav('comprovantes',this)"><span class="nav-ic">🧾</span>Comprovantes<span class="nb ok" id="nb-comp">0</span></div>
+    <div class="nav-item" onclick="nav('relatorios',this)"><span class="nav-ic">📈</span>Relatórios</div>
+    <div class="nav-item" onclick="nav('resumos',this)"><span class="nav-ic">📋</span>Por período</div>
+    <div class="nav-sec">Sistema</div>
+    <div class="nav-item" onclick="nav('config',this)"><span class="nav-ic">⚙️</span>Configurações</div>
+  </nav>
+  <div class="sidebar-bot"><div class="sidebar-ver">AunordMED Financeiro v4.0</div></div>
 </div>
-
-<div class="wrapper" id="wrapper" style="display:none">
-
-  <!-- HEADER -->
-  <div class="header-card">
-    <div class="hc-top">
-      <div class="logo-area">
-        <div class="logo-name">Aunord<span>MED</span></div>
-        <div class="logo-sub">FINANCEIRO</div>
-      </div>
-      <div class="doc-badge" id="doc-badge">Comprovante #—</div>
-    </div>
-    <div class="medico-info">
-      <div class="avatar" id="avatar">—</div>
-      <div>
-        <div class="medico-nome" id="med-nome">—</div>
-        <div class="medico-crm" id="med-crm">—</div>
-        <div class="medico-esp" id="med-esp"></div>
-        <div class="status-badge sb-pago" id="status-badge">✓ Repasse efetuado</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- REPASSE PRINCIPAL -->
-  <div class="repasse-card">
-    <div class="rc-label">Valor do repasse</div>
-    <div class="rc-valor"><span>R$</span><span id="rc-valor">0,00</span></div>
-    <div class="rc-grid">
-      <div class="rc-item">
-        <div class="rc-item-lbl">Data do pagamento</div>
-        <div class="rc-item-val" id="rc-data">—</div>
-      </div>
-      <div class="rc-item">
-        <div class="rc-item-lbl">Competência</div>
-        <div class="rc-item-val" id="rc-comp">—</div>
-      </div>
-      <div class="rc-item">
-        <div class="rc-item-lbl">Tomador</div>
-        <div class="rc-item-val" id="rc-tomador">—</div>
-      </div>
-    </div>
-    <div class="rc-pix" id="rc-pix" style="display:none">
-      <div class="pix-icon">🏧</div>
-      <div>
-        <div class="pix-lbl">Chave PIX utilizada</div>
-        <div class="pix-val" id="pix-val">—</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- RESUMO DO MÊS -->
-  <div class="resumo-grid" id="resumo-grid"></div>
-
-  <!-- HISTÓRICO -->
-  <div class="hist-card">
-    <div class="hist-hd">
-      <h3>📋 Histórico de notas fiscais</h3>
-      <div class="hist-filtro">
-        <select id="hist-filtro-mes" onchange="renderHistorico()">
-          <option value="">Todos os meses</option>
-        </select>
-        <button class="btn btn-primary btn-sm" onclick="abrirAddHistorico()">+ Adicionar</button>
-      </div>
-    </div>
-    <div id="hist-wrap"></div>
-    <div class="hist-total" id="hist-total" style="display:none">
-      <span>Total no período</span>
-      <strong id="hist-total-val">R$ 0,00</strong>
-    </div>
-  </div>
-
-  <!-- AÇÕES -->
-  <div class="acoes-card">
-    <h3>Compartilhar comprovante</h3>
-    <div class="acoes-row">
-      <button class="btn btn-wpp" onclick="enviarWhatsApp()">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.535 5.858L.057 23.633a.5.5 0 00.61.61l5.775-1.478A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.795 9.795 0 01-5.031-1.392l-.361-.214-3.731.955.971-3.625-.235-.373A9.784 9.784 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
-        Enviar por WhatsApp
-      </button>
-      <button class="btn btn-copy" onclick="copiarLink()">
-        🔗 Copiar link
-      </button>
-      <button class="btn btn-print" onclick="window.print()">🖨️ Imprimir</button>
-    </div>
-    <div class="link-display">
-      <span id="link-display-txt"></span>
-      <button class="btn btn-ghost btn-sm" onclick="copiarLink()">Copiar</button>
-    </div>
-  </div>
-
-  <div class="footer">
-    Comprovante gerado por <strong>AunordMED Financeiro</strong> · <span id="footer-data"></span>
+<!-- MAIN -->
+<div class="main">
+<div class="topbar">
+  <div class="tb-title" id="pg-title">Dashboard</div>
+  <div class="tb-right">
+    <span class="tb-date" id="tb-date"></span>
+    <button class="btn btn-ghost btn-sm" onclick="exportarExcel()">⬇ Excel</button>
+    <button class="btn btn-primary btn-sm" onclick="abrirNota()">+ Nova nota</button>
   </div>
 </div>
 
-<!-- MODAL ADICIONAR HISTÓRICO -->
-<div class="edit-overlay" id="mo-hist">
-  <div class="edit-box">
-    <div class="edit-hd"><h3>Adicionar ao histórico</h3><button class="edit-close" onclick="fecharMo('mo-hist')">✕</button></div>
-    <div class="edit-body">
-      <div class="fld"><label>Nº da NF</label><input type="text" id="h-nf" placeholder="00001"></div>
-      <div class="fld"><label>Tomador</label><input type="text" id="h-tomador" placeholder="Unimed, Bradesco…"></div>
-      <div class="fld"><label>Competência</label><input type="month" id="h-comp"></div>
-      <div class="fld"><label>Valor bruto (R$)</label><input type="number" id="h-bruto" placeholder="0,00" step="0.01"></div>
-      <div class="fld"><label>Valor repasse (R$)</label><input type="number" id="h-repasse" placeholder="0,00" step="0.01"></div>
-      <div class="fld"><label>Status</label>
-        <select id="h-status">
-          <option value="Paga ao médico">Paga ao médico</option>
-          <option value="Recebida">Recebida (aguardando repasse)</option>
-          <option value="Emitida">Emitida</option>
-        </select>
-      </div>
+<!-- DASHBOARD -->
+<div class="page active page-wrap" id="page-dashboard">
+  <div class="kpi-grid" id="kpi-grid"></div>
+  <div class="ss-grid" id="ss-grid"></div>
+  <div class="charts-grid">
+    <div class="card"><div class="card-hd"><h3>📊 Bruto × Recebido × Repasse</h3></div><div class="card-bd"><div style="position:relative;height:200px"><canvas id="ch-bar"></canvas></div></div></div>
+    <div class="card"><div class="card-hd"><h3>🥧 Composição do valor bruto</h3></div><div class="card-bd"><div style="position:relative;height:200px"><canvas id="ch-pizza"></canvas></div></div></div>
+    <div class="card chart-full"><div class="card-hd"><h3>📈 Evolução da margem</h3></div><div class="card-bd"><div style="position:relative;height:150px"><canvas id="ch-linha"></canvas></div></div></div>
+  </div>
+</div>
+
+<!-- LANÇAMENTOS -->
+<div class="page page-wrap" id="page-lancamentos">
+  <div class="card">
+    <div class="tbar">
+      <span class="tbar-ttl">Notas fiscais</span>
+      <input class="srch" type="text" placeholder="🔍 Buscar…" oninput="renderTabela()" id="busca">
+      <select class="flt" id="flt-status" onchange="renderTabela()"><option value="">Todos status</option><option value="Emitida">Emitida</option><option value="Recebida">Recebida</option><option value="Paga ao médico">Paga ao médico</option></select>
+      <select class="flt" id="flt-comp" onchange="renderTabela()"><option value="">Competências</option></select>
+      <select class="flt" id="flt-med" onchange="renderTabela()"><option value="">Todos médicos</option></select>
     </div>
-    <div class="edit-ft">
-      <button class="btn btn-ghost" onclick="fecharMo('mo-hist')">Cancelar</button>
-      <button class="btn btn-primary" onclick="salvarHistorico()">Salvar</button>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>Nº NF</th><th>Tomador</th><th>Médicos</th><th>Competência</th><th>Bruto</th><th>Recebido</th><th>Repasse</th><th>Margem</th><th>Status</th><th>WhatsApp</th><th>Ações</th></tr></thead>
+      <tbody id="tb-body"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- PENDÊNCIAS -->
+<div class="page page-wrap" id="page-pendencias">
+  <div class="pend-kpis" id="pend-kpis"></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="pend-card"><div class="pend-hd" style="border-left:4px solid var(--orange);background:var(--orange-l)"><h3>⏳ A receber do tomador</h3><span class="nb" id="cnt-rec" style="background:var(--orange)">0</span></div><div id="pend-rec-wrap"></div></div>
+    <div class="pend-card"><div class="pend-hd" style="border-left:4px solid var(--blue);background:var(--blue-l)"><h3>💳 A pagar aos médicos</h3><span class="nb" id="cnt-pag" style="background:var(--blue)">0</span></div><div id="pend-pag-wrap"></div></div>
+  </div>
+</div>
+
+<!-- ADIANTAMENTOS -->
+<div class="page page-wrap" id="page-adiantamentos">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-orange" onclick="abrirAdiantamento()">+ Novo adiantamento</button></div>
+  <div class="card">
+    <div class="tbar"><span class="tbar-ttl">Adiantamentos</span></div>
+    <div class="tw"><table>
+      <thead><tr><th>Data</th><th>Médico</th><th>Valor</th><th>Descrição</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody id="tb-adt"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- CASHBACK -->
+<div class="page page-wrap" id="page-cashback">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-purple" onclick="abrirCashback()">+ Novo cashback</button></div>
+  <div class="card">
+    <div class="tbar"><span class="tbar-ttl">Cashback e bonificações</span></div>
+    <div class="tw"><table>
+      <thead><tr><th>Data</th><th>Médico</th><th>Tipo</th><th>Valor</th><th>Descrição</th><th>Status</th><th>Ações</th></tr></thead>
+      <tbody id="tb-cb"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- MÉDICOS -->
+<div class="page page-wrap" id="page-medicos">
+  <div style="display:flex;justify-content:flex-end;margin-bottom:12px"><button class="btn btn-primary" onclick="abrirMedico()">+ Cadastrar médico</button></div>
+  <div class="med-cards" id="med-cards"></div>
+</div>
+
+<!-- COMPROVANTES -->
+<div class="page page-wrap" id="page-comprovantes">
+  <div class="card">
+    <div class="tbar">
+      <span class="tbar-ttl">Comprovantes gerados</span>
+      <input class="srch" type="text" id="busca-comp" placeholder="🔍 Buscar médico…" oninput="renderComprovantes()">
+      <select class="flt" id="flt-comp-status" onchange="renderComprovantes()">
+        <option value="">Todos</option>
+        <option value="pendente">Pendente envio</option>
+        <option value="enviado">Enviado</option>
+      </select>
+    </div>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>Médico</th><th>NF</th><th>Tomador</th><th>Competência</th><th>Valor repasse</th><th>Data pag.</th><th>Link</th><th>WhatsApp</th><th>Status</th><th></th></tr></thead>
+      <tbody id="tb-comp"></tbody>
+    </table></div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <div class="card-hd"><h3>📂 Cruzamento com extrato bancário</h3></div>
+    <div class="card-bd">
+      <p style="font-size:13px;color:var(--gray2);margin-bottom:14px">Faça upload do extrato bancário (.CSV ou .OFX) para cruzar automaticamente com as notas fiscais recebidas.</p>
+      <div style="border:2px dashed var(--border);border-radius:var(--radius-lg);padding:32px;text-align:center;cursor:pointer;transition:all .2s" id="drop-zone" onclick="document.getElementById('extrato-file').click()" ondragover="event.preventDefault();this.style.borderColor='var(--g4)'" ondragleave="this.style.borderColor='var(--border)'" ondrop="handleExtratoFile(event)">
+        <div style="font-size:32px;margin-bottom:8px">📄</div>
+        <div style="font-size:14px;font-weight:600;color:var(--gray1)">Arraste o extrato aqui ou clique para selecionar</div>
+        <div style="font-size:12px;color:var(--gray3);margin-top:4px">Formatos aceitos: CSV, OFX, TXT</div>
+        <input type="file" id="extrato-file" accept=".csv,.ofx,.txt" style="display:none" onchange="processarExtrato(this.files[0])">
+      </div>
+      <div id="extrato-resultado" style="margin-top:14px"></div>
     </div>
   </div>
 </div>
+
+<!-- RELATÓRIOS -->
+<div class="page page-wrap" id="page-relatorios">
+  <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center">
+    <label style="font-size:12px;font-weight:600;color:var(--gray2)">Período:</label>
+    <input type="month" id="rel-mes" style="height:32px;width:150px;font-size:12px">
+    <button class="btn btn-primary btn-sm" onclick="renderRelatorio()">Gerar relatório</button>
+  </div>
+  <div class="rel-fatura" id="rel-fatura"></div>
+</div>
+
+<!-- RESUMOS -->
+<div class="page page-wrap" id="page-resumos">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+    <div class="card"><div class="card-hd"><h3>👨‍⚕️ Por médico</h3></div><div id="res-med"></div></div>
+    <div class="card"><div class="card-hd"><h3>📅 Por competência</h3></div><div id="res-comp"></div></div>
+  </div>
+</div>
+
+<!-- CONFIG -->
+<div class="page page-wrap" id="page-config">
+  <div class="card" style="max-width:560px">
+    <div class="card-hd"><h3>⚙️ Configurações</h3></div>
+    <div class="card-bd">
+      <div class="cfg-sec">
+        <h4>Impostos e retenções</h4>
+        <div class="cfg-row"><div><div class="cfg-lbl">Imposto federal retido</div><div class="cfg-sub">ISS/PIS/COFINS descontados pelo tomador</div></div><div style="display:flex;align-items:center;gap:6px"><input type="number" class="pct-inp" id="cfg-imp" value="6.15" step="0.01" onchange="salvarCfg()"><span style="font-weight:600;color:var(--gray3)">%</span></div></div>
+        <div class="cfg-row"><div><div class="cfg-lbl">Retenção padrão PJ</div><div class="cfg-sub">Usado quando o médico não tem % individual</div></div><div style="display:flex;align-items:center;gap:6px"><input type="number" class="pct-inp" id="cfg-ret" value="13" step="0.01" onchange="salvarCfg()"><span style="font-weight:600;color:var(--gray3)">%</span></div></div>
+      </div>
+      <div class="cfg-sec">
+        <h4>WhatsApp (Evolution API)</h4>
+        <div class="cfg-row"><div><div class="cfg-lbl">URL da Evolution API</div><div class="cfg-sub">Ex: https://sua-evolution.onrender.com</div></div></div>
+        <input type="text" id="cfg-wpp-url" placeholder="https://sua-evolution-api.com" style="margin-top:6px">
+        <div class="cfg-row" style="margin-top:10px"><div><div class="cfg-lbl">API Key</div></div></div>
+        <input type="password" id="cfg-wpp-key" placeholder="sua-api-key">
+        <div class="cfg-row" style="margin-top:10px"><div><div class="cfg-lbl">Nome da instância</div><div class="cfg-sub">Nome configurado na Evolution API</div></div></div>
+        <input type="text" id="cfg-wpp-inst" placeholder="aunordmed">
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="salvarCfg()">Salvar</button>
+          <button class="btn btn-wpp btn-sm" onclick="testarWpp()">🟢 Testar WhatsApp</button>
+        </div>
+      </div>
+      <div class="cfg-sec">
+        <h4>URL base dos comprovantes</h4>
+        <input type="text" id="cfg-base-url" placeholder="https://aunordmed-lgtm.github.io/aunordmed-financeiro/comprovante.html" style="margin-top:6px">
+        <div class="fhint" style="margin-top:4px">Usado para gerar o link enviado por WhatsApp</div>
+        <div style="margin-top:8px"><button class="btn btn-primary" onclick="salvarCfg()">Salvar</button></div>
+      </div>
+      <div class="cfg-sec">
+        <h4>Empresa</h4>
+        <div class="fg"><div class="fld"><label>Nome</label><input type="text" id="cfg-nome" placeholder="AunordMED"></div><div class="fld"><label>CNPJ</label><input type="text" id="cfg-cnpj" placeholder="00.000.000/0001-00"></div></div>
+        <div style="margin-top:10px"><button class="btn btn-primary" onclick="salvarCfg()">Salvar</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<!-- MODAL NOTA -->
+<div class="mo" id="mo-nota">
+  <div class="mo-box wide">
+    <div class="mo-hd"><h3 id="mo-nota-tit">Nova nota fiscal</h3><button class="mo-close" onclick="fechar('mo-nota')">✕</button></div>
+    <div class="mo-body">
+      <div class="fg">
+        <div class="fld"><label>Nº da NF <span class="req">*</span></label><input type="text" id="f-nf" placeholder="00001"></div>
+        <div class="fld"><label>Tomador <span class="req">*</span></label><input type="text" id="f-tomador" placeholder="Unimed…"></div>
+        <div class="fld"><label>Competência</label><input type="month" id="f-comp"></div>
+        <div class="fld"><label>Data emissão</label><input type="date" id="f-emissao"></div>
+        <div class="fld"><label>Status</label><select id="f-status"><option value="Emitida">Emitida</option><option value="Recebida">Recebida</option><option value="Paga ao médico">Paga ao médico</option></select></div>
+        <div class="fld"><label>Observações</label><input type="text" id="f-obs"></div>
+        <div class="fld fg-full"><label>Valor bruto total (R$) <span class="req">*</span></label><input type="number" id="f-bruto" class="inp-money" placeholder="0,00" min="0" step="0.01" oninput="calcPreview()"><span class="fhint">Valor total da NF — divida entre os médicos abaixo</span></div>
+      </div>
+      <div class="sec-lbl">Médicos vinculados</div>
+      <div class="med-picker">
+        <div class="med-picker-hd"><span>Médico</span><div style="display:flex;gap:36px;font-size:10px;color:var(--gray3)"><span style="width:100px;text-align:center">Valor (R$)</span><span style="width:100px;text-align:center">% Retenção</span><span style="width:30px"></span></div></div>
+        <div class="med-list-sel" id="med-sel-list"></div>
+        <div class="med-add-row"><select id="med-add-sel" onchange="adicionarMedNota()" style="height:32px;font-size:12px"><option value="">+ Adicionar médico à nota…</option></select></div>
+        <div class="pct-warn" id="pct-warn">⚠️ Soma dos valores deve ser igual ao valor bruto</div>
+      </div>
+      <div class="cb-row">
+        <div class="cb bl"><div class="cb-lbl">Recebido (−<span id="pv-imp">6,15</span>%)</div><div class="cb-val" id="pv-rec">R$ 0,00</div></div>
+        <div class="cb"><div class="cb-lbl">Total repasse</div><div class="cb-val" id="pv-rep">R$ 0,00</div></div>
+        <div class="cb hl"><div class="cb-lbl">Margem empresa</div><div class="cb-val" id="pv-mar">R$ 0,00</div></div>
+        <div class="cb"><div class="cb-lbl">% Margem</div><div class="cb-val" id="pv-pct">0,00%</div></div>
+      </div>
+    </div>
+    <div class="mo-ft"><button class="btn btn-ghost" onclick="fechar('mo-nota')">Cancelar</button><button class="btn btn-primary" id="btn-sv-nota" onclick="salvarNota()">Salvar nota</button></div>
+  </div>
+</div>
+
+<!-- MODAL MÉDICO -->
+<div class="mo" id="mo-med">
+  <div class="mo-box">
+    <div class="mo-hd"><h3 id="mo-med-tit">Cadastrar médico</h3><button class="mo-close" onclick="fechar('mo-med')">✕</button></div>
+    <div class="mo-body">
+      <div class="fg">
+        <div class="fld"><label>Nome completo <span class="req">*</span></label><input type="text" id="m-nome" placeholder="Dr. Nome Sobrenome"></div>
+        <div class="fld"><label>CRM</label><input type="text" id="m-crm" placeholder="CRM/SP 123456"></div>
+        <div class="fld"><label>Especialidade</label><input type="text" id="m-esp" placeholder="Cardiologia"></div>
+        <div class="fld"><label>E-mail</label><input type="email" id="m-email"></div>
+        <div class="fld"><label>WhatsApp <span class="req">*</span></label><input type="text" id="m-wpp" placeholder="5511999999999"><span class="fhint">Somente números com DDI+DDD</span></div>
+        <div class="fld"><label>% Retenção <span class="req">*</span></label><input type="number" id="m-ret" placeholder="13" min="0" max="100" step="0.01"></div>
+        <div class="fld"><label>Tipo da chave PIX</label><select id="m-pix-tipo"><option value="cpf">CPF</option><option value="cnpj">CNPJ</option><option value="email">E-mail</option><option value="telefone">Telefone</option><option value="aleatoria">Chave aleatória</option></select></div>
+        <div class="fld"><label>Chave PIX</label><input type="text" id="m-pix" placeholder="000.000.000-00"></div>
+        <div class="fld fg-full"><label>Observações</label><textarea id="m-obs" rows="2"></textarea></div>
+      </div>
+    </div>
+    <div class="mo-ft"><button class="btn btn-ghost" onclick="fechar('mo-med')">Cancelar</button><button class="btn btn-primary" id="btn-sv-med" onclick="salvarMedico()">Salvar</button></div>
+  </div>
+</div>
+
+<!-- MODAL PAGAMENTO + WHATSAPP -->
+<div class="mo" id="mo-pagar">
+  <div class="mo-box">
+    <div class="mo-hd"><h3>💳 Registrar pagamento ao médico</h3><button class="mo-close" onclick="fechar('mo-pagar')">✕</button></div>
+    <div class="mo-body">
+      <div class="fg">
+        <div class="fld"><label>Médico</label><input type="text" id="pg-medico" readonly style="background:var(--gray6)"></div>
+        <div class="fld"><label>Valor repasse calculado</label><input type="text" id="pg-repasse-calc" readonly style="background:var(--gray6)"></div>
+        <div class="fld"><label>Valor pago ao médico (editável)</label><input type="number" id="pg-repasse-edit" class="inp-money" step="0.01" oninput="atualizarPreviewWpp()"></div>
+        <div class="fld"><label>Data do pagamento</label><input type="date" id="pg-data" oninput="atualizarPreviewWpp()"></div>
+        <div class="fld"><label>PIX do médico</label><input type="text" id="pg-pix" readonly style="background:var(--gray6)"></div>
+      </div>
+      <div class="sec-lbl" style="margin-top:14px">Preview da mensagem WhatsApp</div>
+      <textarea id="pg-wpp-msg" rows="8" style="font-size:12px;line-height:1.6;margin-top:6px"></textarea>
+      <div class="fhint">Você pode editar a mensagem antes de enviar</div>
+    </div>
+    <div class="mo-ft">
+      <button class="btn btn-ghost" onclick="fechar('mo-pagar')">Cancelar</button>
+      <button class="btn btn-primary" id="btn-pg-semwpp" onclick="confirmarPagamento(false)">Salvar sem WhatsApp</button>
+      <button class="btn btn-wpp" id="btn-pg-wpp" onclick="confirmarPagamento(true)">💬 Salvar e enviar WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADIANTAMENTO -->
+<div class="mo" id="mo-adt">
+  <div class="mo-box sm">
+    <div class="mo-hd"><h3 id="mo-adt-tit">Novo adiantamento</h3><button class="mo-close" onclick="fechar('mo-adt')">✕</button></div>
+    <div class="mo-body">
+      <div class="fg">
+        <div class="fld fg-full"><label>Médico <span class="req">*</span></label><select id="adt-med"><option value="">— selecione —</option></select></div>
+        <div class="fld"><label>Valor (R$) <span class="req">*</span></label><input type="number" id="adt-valor" class="inp-money" step="0.01" placeholder="0,00"></div>
+        <div class="fld"><label>Data</label><input type="date" id="adt-data"></div>
+        <div class="fld fg-full"><label>Descrição</label><input type="text" id="adt-desc" placeholder="Motivo do adiantamento"></div>
+      </div>
+    </div>
+    <div class="mo-ft"><button class="btn btn-ghost" onclick="fechar('mo-adt')">Cancelar</button><button class="btn btn-orange" onclick="salvarAdiantamento()">Salvar adiantamento</button></div>
+  </div>
+</div>
+
+<!-- MODAL CASHBACK -->
+<div class="mo" id="mo-cb">
+  <div class="mo-box sm">
+    <div class="mo-hd"><h3 id="mo-cb-tit">Novo cashback</h3><button class="mo-close" onclick="fechar('mo-cb')">✕</button></div>
+    <div class="mo-body">
+      <div class="fg">
+        <div class="fld fg-full"><label>Médico <span class="req">*</span></label><select id="cb-med"><option value="">— selecione —</option></select></div>
+        <div class="fld fg-full"><label>Tipo <span class="req">*</span></label>
+          <select id="cb-tipo">
+            <option value="indicacao">Indicação de paciente/médico</option>
+            <option value="reducao_aliquota">Redução de alíquota</option>
+            <option value="primeiro_pagamento">Primeiro pagamento menor</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="fld"><label>Valor (R$) <span class="req">*</span></label><input type="number" id="cb-valor" class="inp-money" step="0.01" placeholder="0,00"></div>
+        <div class="fld"><label>Data</label><input type="date" id="cb-data"></div>
+        <div class="fld fg-full"><label>Descrição</label><input type="text" id="cb-desc" placeholder="Detalhes do cashback"></div>
+      </div>
+    </div>
+    <div class="mo-ft"><button class="btn btn-ghost" onclick="fechar('mo-cb')">Cancelar</button><button class="btn btn-purple" onclick="salvarCashback()">Salvar cashback</button></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR -->
+<div class="mo" id="mo-conf"><div class="mo-box sm"><div class="mo-hd"><h3>Confirmar exclusão</h3><button class="mo-close" onclick="fechar('mo-conf')">✕</button></div><div class="mo-body"><p id="conf-msg" style="font-size:13px;color:var(--gray1);line-height:1.6"></p></div><div class="mo-ft"><button class="btn btn-ghost" onclick="fechar('mo-conf')">Cancelar</button><button class="btn btn-danger" id="btn-conf">Excluir</button></div></div></div>
 
 <div class="toast" id="toast"></div>
 
@@ -277,237 +534,711 @@ textarea{height:auto;padding:9px 10px}
 const SUPA_URL='https://hleesgnzpkjuhjshyaal.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhsZWVzZ256cGtqdWhqc2h5YWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzODczMTksImV4cCI6MjA5Nzk2MzMxOX0.jnVO9Bqo-s5DPK0-tFeYr_UeBaEkXCmVa2xhA93aVDk';
 const H={'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Prefer':'return=representation'};
-
 async function sGet(t,q=''){const r=await fetch(`${SUPA_URL}/rest/v1/${t}?${q}`,{headers:H});if(!r.ok)throw new Error(await r.text());return r.json();}
 async function sPost(t,b){const r=await fetch(`${SUPA_URL}/rest/v1/${t}`,{method:'POST',headers:H,body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sPatch(t,id,b){const r=await fetch(`${SUPA_URL}/rest/v1/${t}?id=eq.${id}`,{method:'PATCH',headers:H,body:JSON.stringify(b)});if(!r.ok)throw new Error(await r.text());return r.json();}
+async function sDel(t,id){const r=await fetch(`${SUPA_URL}/rest/v1/${t}?id=eq.${id}`,{method:'DELETE',headers:H});if(!r.ok)throw new Error(await r.text());}
 
-let comp=null, medico=null, notas=[], historicoExtra=[];
-let cfg={wppUrl:'',wppKey:'',wppInst:'aunordmed'};
+let notas=[],medicos=[],adiantamentos=[],cashbacks=[];
+let editNota=null,editMed=null,editAdt=null,editCb=null,medSel=[];
+let pagandoNota=null,pagandoMedico=null;
+let cfg={imposto:6.15,retencao:13,nome:'',cnpj:'',wppUrl:'',wppKey:'',wppInst:'aunordmed',baseUrl:'https://aunordmed-lgtm.github.io/aunordmed-financeiro/comprovante.html'};
+let chBar,chPizza,chLinha;
 
-const brl=v=>Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const pct=v=>(Number(v||0)*100).toFixed(2).replace('.',',')+' %';
 const fmtMes=m=>{if(!m)return'—';const[y,mo]=m.split('-');const ms=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];return`${ms[+mo-1]}/${y}`;};
 const fmtDt=d=>{if(!d)return'—';const p=d.split('T')[0].split('-');return`${p[2]}/${p[1]}/${p[0]}`;};
 const ini=n=>n.split(' ').filter(Boolean).slice(0,2).map(x=>x[0].toUpperCase()).join('');
-const avc=n=>{const cs=['#22994D','#1A56DB','#D97706','#7C3AED','#DB2777','#0891B2'];let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))%cs.length;return cs[Math.abs(h)];};
+const avc=n=>{const cs=['#22994D','#1A56DB','#D97706','#7C3AED','#DB2777','#0891B2','#B45309','#BE185D'];let h=0;for(let c of n)h=(h*31+c.charCodeAt(0))%cs.length;return cs[Math.abs(h)];};
+const uid=()=>Math.random().toString(36).substring(2,10)+Date.now().toString(36);
 
-function toast(m,tp=''){const e=document.getElementById('toast');e.textContent=m;e.className='toast '+(tp||'');e.classList.add('show');setTimeout(()=>e.classList.remove('show'),3000);}
-function abrirMo(id){document.getElementById(id).classList.add('open');}
-function fecharMo(id){document.getElementById(id).classList.remove('open');}
+function lov(s,m='Carregando...'){document.getElementById('lov').classList.toggle('show',s);document.getElementById('lov-msg').textContent=m;}
+function toast(m,tp=''){const e=document.getElementById('toast');e.textContent=m;e.className='toast '+(tp?tp:'');e.classList.add('show');setTimeout(()=>e.classList.remove('show'),3500);}
+function abrir(id){document.getElementById(id).classList.add('open');}
+function fechar(id){document.getElementById(id).classList.remove('open');}
+function confirmar(msg,cb){document.getElementById('conf-msg').textContent=msg;document.getElementById('btn-conf').onclick=()=>{fechar('mo-conf');cb();};abrir('mo-conf');}
 
-function getToken(){
-  const params=new URLSearchParams(window.location.search);
-  return params.get('token')||params.get('t');
+const pgTitles={dashboard:'Dashboard',lancamentos:'Notas fiscais',pendencias:'Pendências',adiantamentos:'Adiantamentos',cashback:'Cashback',medicos:'Médicos',comprovantes:'Comprovantes',relatorios:'Relatório de faturamento',resumos:'Por período',config:'Configurações'};
+function nav(name,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('pg-title').textContent=pgTitles[name]||name;
+  if(name==='dashboard')renderCharts();
+  if(name==='comprovantes'){renderComprovantes();}
+  if(name==='resumos'){renderResumos();}
+  if(name==='pendencias')renderPend();
+  if(name==='adiantamentos')renderAdiantamentos();
+  if(name==='cashback')renderCashbacks();
+  if(name==='relatorios')renderRelatorio();
 }
 
-async function carregarCfg(){
-  const s=localStorage.getItem('am_cfg4');
-  if(s) cfg={...cfg,...JSON.parse(s)};
-}
-
-async function init(){
-  await carregarCfg();
-  const token=getToken();
-  document.getElementById('link-display-txt').textContent=window.location.href;
-  document.getElementById('footer-data').textContent=new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
-
-  if(!token){
-    // Modo demo — sem token
-    mostrarDemo();
-    return;
-  }
-
+async function carregarTudo(){
+  lov(true,'Sincronizando...');
   try{
-    // Buscar comprovante pelo token
-    const comps=await sGet('comprovantes',`token=eq.${token}&limit=1`);
-    if(!comps||!comps.length){mostrarErro('Comprovante não encontrado.');return;}
-    comp=comps[0];
-
-    // Incrementar visualizações
-    fetch(`${SUPA_URL}/rest/v1/comprovantes?id=eq.${comp.id}`,{method:'PATCH',headers:H,body:JSON.stringify({visualizacoes:(comp.visualizacoes||0)+1})}).catch(()=>{});
-
-    // Buscar dados do médico
-    const meds=await sGet('medicos',`nome=eq.${encodeURIComponent(comp.medico_nome)}&limit=1`).catch(()=>[]);
-    medico=meds[0]||null;
-
-    // Buscar todas as notas do médico
-    const todasNotas=await sGet('notas_fiscais','order=criado_em.desc').catch(()=>[]);
-    notas=todasNotas.filter(n=>n.medicos_nota?.some(mn=>mn.nome===comp.medico_nome)||n.nomes_medicos?.includes(comp.medico_nome));
-
-    renderComprovante();
-  }catch(e){
-    mostrarErro('Erro ao carregar: '+e.message);
-  }
+    [notas,medicos,adiantamentos,cashbacks]=await Promise.all([
+      sGet('notas_fiscais','order=criado_em.desc'),
+      sGet('medicos','order=nome.asc').catch(()=>[]),
+      sGet('adiantamentos','order=criado_em.desc').catch(()=>[]),
+      sGet('cashback','order=criado_em.desc').catch(()=>[])
+    ]);
+  }catch(e){toast('Erro ao carregar: '+e.message,'err');}
+  lov(false);renderTudo();
 }
 
-function mostrarDemo(){
-  // Dados de exemplo para visualização
-  comp={token:'demo',medico_nome:'Dr. João Silva',medico_crm:'CRM/SE 12345',tomador:'Unimed',valor_repasse:4250.00,data_pagamento:new Date().toISOString().split('T')[0],competencia:new Date().toISOString().substring(0,7),dados_extras:{nf:'00042',pix:'123.456.789-00',tipo_pix:'CPF'}};
-  medico={especialidade:'Clínica Médica',chave_pix:'123.456.789-00',tipo_pix:'cpf',telefone_whatsapp:'5511999999999'};
-  notas=[
-    {nf:'00042',tomador:'Unimed',comp:new Date().toISOString().substring(0,7),status:'Paga ao médico',medicos_nota:[{nome:'Dr. João Silva',valor_bruto_medico:5000,repasse:4350}]},
-    {nf:'00038',tomador:'Bradesco Saúde',comp:new Date(Date.now()-30*24*3600000).toISOString().substring(0,7),status:'Paga ao médico',medicos_nota:[{nome:'Dr. João Silva',valor_bruto_medico:3800,repasse:3306}]},
-    {nf:'00031',tomador:'Unimed',comp:new Date(Date.now()-60*24*3600000).toISOString().substring(0,7),status:'Paga ao médico',medicos_nota:[{nome:'Dr. João Silva',valor_bruto_medico:4200,repasse:3654}]},
-  ];
-  renderComprovante();
+function carregarCfg(){
+  const s=localStorage.getItem('am_cfg4');if(s)cfg={...cfg,...JSON.parse(s)};
+  document.getElementById('cfg-imp').value=cfg.imposto;
+  document.getElementById('cfg-ret').value=cfg.retencao;
+  document.getElementById('cfg-nome').value=cfg.nome||'';
+  document.getElementById('cfg-cnpj').value=cfg.cnpj||'';
+  document.getElementById('cfg-wpp-url').value=cfg.wppUrl||'';
+  document.getElementById('cfg-wpp-key').value=cfg.wppKey||'';
+  document.getElementById('cfg-wpp-inst').value=cfg.wppInst||'aunordmed';
+  document.getElementById('cfg-base-url').value=cfg.baseUrl||'';
+}
+function salvarCfg(){
+  cfg.imposto=parseFloat(document.getElementById('cfg-imp').value)||6.15;
+  cfg.retencao=parseFloat(document.getElementById('cfg-ret').value)||13;
+  cfg.nome=document.getElementById('cfg-nome').value;
+  cfg.cnpj=document.getElementById('cfg-cnpj').value;
+  cfg.wppUrl=document.getElementById('cfg-wpp-url').value.trim();
+  cfg.wppKey=document.getElementById('cfg-wpp-key').value.trim();
+  cfg.wppInst=document.getElementById('cfg-wpp-inst').value.trim()||'aunordmed';
+  cfg.baseUrl=document.getElementById('cfg-base-url').value.trim()||'https://aunordmed-lgtm.github.io/aunordmed-financeiro/comprovante.html';
+  localStorage.setItem('am_cfg4',JSON.stringify(cfg));
+  toast('Configurações salvas!');
 }
 
-function mostrarErro(msg){
-  document.getElementById('lov').classList.add('hide');
-  document.getElementById('wrapper').style.display='block';
-  document.getElementById('wrapper').innerHTML=`<div style="text-align:center;padding:60px 20px"><div style="font-size:48px;margin-bottom:16px">❌</div><h2 style="color:var(--gray1);margin-bottom:8px">Comprovante não encontrado</h2><p style="color:var(--gray3)">${msg}</p></div>`;
-}
-
-function renderComprovante(){
-  document.getElementById('lov').classList.add('hide');
-  document.getElementById('wrapper').style.display='block';
-
-  // Header
-  document.getElementById('doc-badge').textContent=`Comprovante #${comp.dados_extras?.nf||comp.token?.substring(0,8)||'—'}`;
-  const nome=comp.medico_nome||'—';
-  document.getElementById('avatar').textContent=ini(nome);
-  document.getElementById('avatar').style.background=avc(nome);
-  document.getElementById('med-nome').textContent=nome;
-  document.getElementById('med-crm').textContent=comp.medico_crm||medico?.crm||'—';
-  if(medico?.especialidade) document.getElementById('med-esp').textContent=medico.especialidade;
-
-  // Repasse
-  document.getElementById('rc-valor').textContent=brl(comp.valor_repasse);
-  document.getElementById('rc-data').textContent=fmtDt(comp.data_pagamento);
-  document.getElementById('rc-comp').textContent=fmtMes(comp.competencia);
-  document.getElementById('rc-tomador').textContent=comp.tomador||'—';
-
-  // PIX
-  const pix=comp.dados_extras?.pix||medico?.chave_pix;
-  if(pix){
-    document.getElementById('rc-pix').style.display='flex';
-    document.getElementById('pix-val').textContent=`${(comp.dados_extras?.tipo_pix||medico?.tipo_pix||'PIX').toUpperCase()}: ${pix}`;
-  }
-
-  renderResumoMes();
-  renderHistoricoFiltro();
-  renderHistorico();
-}
-
-function renderResumoMes(){
-  const mes=comp.competencia;
-  const notasMes=notas.filter(n=>n.comp===mes);
-  const totalBruto=notasMes.reduce((a,n)=>{const mn=n.medicos_nota?.find(mn=>mn.nome===comp.medico_nome);return a+(mn?.valor_bruto_medico||0);},0);
-  const totalRepasse=notasMes.reduce((a,n)=>{const mn=n.medicos_nota?.find(mn=>mn.nome===comp.medico_nome);return a+(mn?.repasse||0);},0);
-  document.getElementById('resumo-grid').innerHTML=`
-    <div class="res-item"><div class="res-lbl">NFs no mês</div><div class="res-val">${notasMes.length}</div><div class="res-sub">${fmtMes(mes)}</div></div>
-    <div class="res-item"><div class="res-lbl">Bruto no mês</div><div class="res-val">R$ ${brl(totalBruto)}</div><div class="res-sub">Valor total emitido</div></div>
-    <div class="res-item"><div class="res-lbl">Repasse no mês</div><div class="res-val" style="color:var(--g2)">R$ ${brl(totalRepasse)}</div><div class="res-sub">Valor líquido recebido</div></div>`;
-}
-
-function renderHistoricoFiltro(){
-  const meses=[...new Set(notas.map(n=>n.comp).filter(Boolean))].sort().reverse();
-  const sel=document.getElementById('hist-filtro-mes');
-  sel.innerHTML='<option value="">Todos os meses</option>'+meses.map(m=>`<option value="${m}"${m===comp.competencia?' selected':''}>${fmtMes(m)}</option>`).join('');
-}
-
-function renderHistorico(){
-  const mesFiltro=document.getElementById('hist-filtro-mes').value;
-  const notasFiltradas=notas.filter(n=>!mesFiltro||n.comp===mesFiltro);
-  const extras=historicoExtra.filter(h=>!mesFiltro||h.comp===mesFiltro);
-  const todos=[...notasFiltradas.map(n=>{
-    const mn=n.medicos_nota?.find(mn=>mn.nome===comp.medico_nome);
-    return{nf:n.nf,tomador:n.tomador,comp:n.comp,bruto:mn?.valor_bruto_medico||0,repasse:mn?.repasse||0,status:n.status,fonte:'banco'};
-  }),...extras];
-
-  const wrap=document.getElementById('hist-wrap');
-  const totalDiv=document.getElementById('hist-total');
-
-  if(!todos.length){
-    wrap.innerHTML=`<div class="hist-empty"><div class="hist-empty-ic">📋</div><p>Nenhuma nota encontrada neste período</p></div>`;
-    totalDiv.style.display='none';
-    return;
-  }
-
-  const totalRepasse=todos.reduce((a,t)=>a+t.repasse,0);
-  wrap.innerHTML=`<table class="hist-table">
-    <thead><tr><th>NF</th><th>Tomador</th><th>Competência</th><th>Bruto</th><th>Repasse</th><th>Status</th></tr></thead>
-    <tbody>${todos.map(t=>{
-      const bdg=t.status==='Paga ao médico'?'b-pag':t.status==='Recebida'?'b-rec':'b-emit';
-      const lbl=t.status==='Paga ao médico'?'✓ Pago':t.status==='Recebida'?'Recebida':'Emitida';
-      return`<tr>
-        <td class="mono" style="font-weight:600">${t.nf||'—'}</td>
-        <td>${t.tomador||'—'}</td>
-        <td class="mono">${fmtMes(t.comp)}</td>
-        <td class="mono">R$ ${brl(t.bruto)}</td>
-        <td class="mono" style="font-weight:600;color:var(--g2)">R$ ${brl(t.repasse)}</td>
-        <td><span class="badge ${bdg}">${lbl}</span></td>
-      </tr>`;
-    }).join('')}</tbody>
-  </table>`;
-
-  totalDiv.style.display='flex';
-  document.getElementById('hist-total-val').textContent=`R$ ${brl(totalRepasse)}`;
-}
-
-function abrirAddHistorico(){
-  document.getElementById('h-nf').value='';
-  document.getElementById('h-tomador').value='';
-  document.getElementById('h-comp').value=comp?.competencia||'';
-  document.getElementById('h-bruto').value='';
-  document.getElementById('h-repasse').value='';
-  document.getElementById('h-status').value='Paga ao médico';
-  abrirMo('mo-hist');
-}
-
-function salvarHistorico(){
-  const nf=document.getElementById('h-nf').value.trim();
-  const tomador=document.getElementById('h-tomador').value.trim();
-  const compVal=document.getElementById('h-comp').value;
-  const bruto=parseFloat(document.getElementById('h-bruto').value)||0;
-  const repasse=parseFloat(document.getElementById('h-repasse').value)||0;
-  const status=document.getElementById('h-status').value;
-  if(!tomador||!bruto){toast('Preencha tomador e valor bruto.','err');return;}
-  historicoExtra.push({nf,tomador,comp:compVal,bruto,repasse,status,fonte:'manual'});
-  fecharMo('mo-hist');
-  renderHistorico();
-  toast('Adicionado ao histórico!');
-}
-
-function copiarLink(){
-  navigator.clipboard.writeText(window.location.href).then(()=>toast('Link copiado!')).catch(()=>{
-    const el=document.createElement('textarea');
-    el.value=window.location.href;
-    document.body.appendChild(el);el.select();document.execCommand('copy');document.body.removeChild(el);
-    toast('Link copiado!');
-  });
-}
-
-async function enviarWhatsApp(){
-  const tel=medico?.telefone_whatsapp||medico?.telefone;
-  if(!tel){toast('Médico sem WhatsApp cadastrado no sistema.','err');return;}
-  if(!cfg.wppUrl){
-    // Fallback: abrir WhatsApp Web com a mensagem
-    const msg=gerarMensagem();
-    const url=`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`;
-    window.open(url,'_blank');
-    toast('Abrindo WhatsApp…','wpp');
-    return;
-  }
-  // Evolution API
+async function testarWpp(){
+  if(!cfg.wppUrl||!cfg.wppKey){toast('Configure a URL e API Key da Evolution API primeiro.','err');return;}
   try{
-    const msg=gerarMensagem();
+    const r=await fetch(`${cfg.wppUrl}/instance/connectionState/${cfg.wppInst}`,{headers:{'apikey':cfg.wppKey}});
+    const d=await r.json();
+    if(d.instance?.state==='open')toast('✅ WhatsApp conectado!','wpp');
+    else toast('⚠️ WhatsApp desconectado. Verifique o QR Code na Evolution API.','err');
+  }catch(e){toast('Erro ao testar: '+e.message,'err');}
+}
+
+async function enviarWhatsApp(telefone,mensagem){
+  if(!cfg.wppUrl||!cfg.wppKey){return false;}
+  try{
     const r=await fetch(`${cfg.wppUrl}/message/sendText/${cfg.wppInst}`,{
       method:'POST',
       headers:{'Content-Type':'application/json','apikey':cfg.wppKey},
-      body:JSON.stringify({number:tel,text:msg,delay:1000})
+      body:JSON.stringify({number:telefone,text:mensagem,delay:1000})
     });
-    if(r.ok)toast('WhatsApp enviado com sucesso!','wpp');
-    else toast('Erro ao enviar. Verifique a Evolution API.','err');
-  }catch(e){
-    const msg=gerarMensagem();
-    window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`,'_blank');
+    return r.ok;
+  }catch(e){return false;}
+}
+
+function calcNota(bruto,medsSel){
+  const b=parseFloat(bruto)||0;
+  const imp=cfg.imposto/100;
+  const recebido=b*(1-imp);
+  let totalRepasse=0;
+  const meds=medsSel.map(ms=>{
+    const ret=parseFloat(ms.ret)/100;
+    const repasse=parseFloat(ms.valor||0)*(1-ret);
+    totalRepasse+=repasse;
+    return{...ms,repasse};
+  });
+  const margem=recebido-totalRepasse;
+  const pctMargem=recebido>0?margem/recebido:0;
+  return{bruto:b,recebido,totalRepasse,margem,pct_margem:pctMargem,meds};
+}
+function getRetMed(nome){const m=medicos.find(x=>x.nome===nome);return m?.retencao||cfg.retencao;}
+
+// MED PICKER NA NOTA
+function renderMedSel(){
+  const lista=document.getElementById('med-sel-list');
+  if(!medSel.length){lista.innerHTML=`<div style="padding:12px;text-align:center;color:var(--gray3);font-size:11px">Adicione ao menos um médico</div>`;calcPreview();return;}
+  lista.innerHTML=medSel.map((ms,i)=>`<div class="med-row">
+    <div><div style="font-weight:500;font-size:12px">${ms.nome}</div><div style="font-size:10px;color:var(--gray3)">${ms.crm||''}</div></div>
+    <input type="number" value="${ms.valor||''}" placeholder="0,00" min="0" step="0.01" oninput="medSel[${i}].valor=this.value;calcPreview()" style="height:28px;font-size:12px;font-family:var(--mono);text-align:right;padding:0 6px">
+    <input type="number" value="${ms.ret}" min="0" max="100" step="0.01" oninput="medSel[${i}].ret=this.value;calcPreview()" style="height:28px;font-size:12px;font-family:var(--mono);text-align:right;padding:0 6px">
+    <button class="rmv-btn" onclick="medSel.splice(${i},1);renderMedSel()">✕</button>
+  </div>`).join('');
+  calcPreview();
+}
+function adicionarMedNota(){
+  const sel=document.getElementById('med-add-sel');
+  const nome=sel.value;if(!nome)return;
+  if(medSel.find(m=>m.nome===nome)){toast('Médico já adicionado.','err');sel.value='';return;}
+  const m=medicos.find(x=>x.nome===nome);
+  medSel.push({nome,crm:m?.crm||'',ret:m?.retencao||cfg.retencao,valor:''});
+  sel.value='';renderMedSel();
+}
+function calcPreview(){
+  const bruto=parseFloat(document.getElementById('f-bruto').value)||0;
+  const soma=medSel.reduce((a,m)=>a+(parseFloat(m.valor)||0),0);
+  const warn=document.getElementById('pct-warn');
+  warn.className='pct-warn'+(medSel.length&&bruto>0&&Math.abs(soma-bruto)>0.01?' show':'');
+  const v=calcNota(bruto,medSel);
+  document.getElementById('pv-imp').textContent=cfg.imposto.toFixed(2).replace('.',',');
+  document.getElementById('pv-rec').textContent=brl(v.recebido);
+  document.getElementById('pv-rep').textContent=brl(v.totalRepasse);
+  document.getElementById('pv-mar').textContent=brl(v.margem);
+  document.getElementById('pv-pct').textContent=pct(v.pct_margem);
+}
+function popularMedSel(){
+  const sel=document.getElementById('med-add-sel');
+  sel.innerHTML='<option value="">+ Adicionar médico à nota…</option>'+medicos.map(m=>`<option value="${m.nome}">${m.nome}${m.crm?' ('+m.crm+')':''}</option>`).join('');
+}
+
+// MODAL NOTA
+function abrirNota(nota=null){
+  editNota=nota;medSel=[];
+  document.getElementById('mo-nota-tit').textContent=nota?'Editar nota':'Nova nota fiscal';
+  ['f-nf','f-tomador','f-comp','f-emissao','f-bruto','f-obs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-status').value='Emitida';
+  if(nota){
+    document.getElementById('f-nf').value=nota.nf||'';
+    document.getElementById('f-tomador').value=nota.tomador||'';
+    document.getElementById('f-comp').value=nota.comp||'';
+    document.getElementById('f-emissao').value=nota.emissao?nota.emissao.split('T')[0]:'';
+    document.getElementById('f-bruto').value=nota.bruto||'';
+    document.getElementById('f-status').value=nota.status||'Emitida';
+    document.getElementById('f-obs').value=nota.obs||'';
+    if(nota.medicos_nota)medSel=nota.medicos_nota.map(mn=>({nome:mn.nome,crm:mn.crm||'',ret:mn.retencao_individual||cfg.retencao,valor:mn.valor_bruto_medico||''}));
+  }
+  popularMedSel();renderMedSel();calcPreview();abrir('mo-nota');
+}
+async function salvarNota(){
+  const nf=document.getElementById('f-nf').value.trim();
+  const tomador=document.getElementById('f-tomador').value.trim();
+  const bruto=parseFloat(document.getElementById('f-bruto').value);
+  if(!nf||!tomador||!bruto){toast('Preencha NF, tomador e valor bruto.','err');return;}
+  if(!medSel.length){toast('Adicione ao menos um médico.','err');return;}
+  const soma=medSel.reduce((a,m)=>a+(parseFloat(m.valor)||0),0);
+  if(Math.abs(soma-bruto)>0.01){toast('Soma dos valores deve ser igual ao bruto.','err');return;}
+  const v=calcNota(bruto,medSel);
+  const medicos_nota=medSel.map(ms=>({nome:ms.nome,crm:ms.crm||'',valor_bruto_medico:parseFloat(ms.valor)||0,retencao_individual:parseFloat(ms.ret)||cfg.retencao,repasse:parseFloat(ms.valor||0)*(1-parseFloat(ms.ret||cfg.retencao)/100)}));
+  const payload={nf,tomador,comp:document.getElementById('f-comp').value||null,emissao:document.getElementById('f-emissao').value||null,status:document.getElementById('f-status').value,obs:document.getElementById('f-obs').value.trim()||null,bruto:v.bruto,recebido:v.recebido,total_repasse:v.totalRepasse,margem:v.margem,pct_margem:v.pct_margem,medicos_nota,nomes_medicos:medSel.map(m=>m.nome).join(', ')};
+  const btn=document.getElementById('btn-sv-nota');btn.disabled=true;btn.innerHTML='<span class="spin"></span> Salvando…';
+  try{
+    if(editNota)await sPatch('notas_fiscais',editNota.id,payload);
+    else await sPost('notas_fiscais',payload);
+    toast(editNota?'Nota atualizada!':'Nota adicionada!');fechar('mo-nota');await carregarTudo();
+  }catch(e){toast('Erro: '+e.message,'err');}
+  btn.disabled=false;btn.textContent='Salvar nota';
+}
+
+// PAGAMENTO COM WHATSAPP
+function abrirPagamento(nf,medicoNome){
+  pagandoNota=nf;
+  const mn=nf.medicos_nota?.find(m=>m.nome===medicoNome);
+  const med=medicos.find(m=>m.nome===medicoNome);
+  pagandoMedico={...med,mn};
+  document.getElementById('pg-medico').value=medicoNome;
+  document.getElementById('pg-repasse-calc').value=brl(mn?.repasse||nf.total_repasse||0);
+  document.getElementById('pg-repasse-edit').value=(mn?.repasse||nf.total_repasse||0).toFixed(2);
+  document.getElementById('pg-data').value=new Date().toISOString().split('T')[0];
+  document.getElementById('pg-pix').value=med?.chave_pix?`${med.tipo_pix?.toUpperCase()||'PIX'}: ${med.chave_pix}`:'Não cadastrado';
+  atualizarPreviewWpp();
+  abrir('mo-pagar');
+}
+function gerarMsgWpp(medicoNome,medCrm,tomador,valorRepasse,dataPag,comp,token){
+  const linkComp=`${cfg.baseUrl}?token=${token}`;
+  return `🏥 *AunordMED Financeiro*\n\nOlá, Dr(a). *${medicoNome}*!\n\nSeu repasse referente à competência *${fmtMes(comp)||'—'}* foi processado.\n\n💰 *Valor:* ${brl(valorRepasse)}\n📅 *Data:* ${fmtDt(dataPag)}\n🏢 *Tomador:* ${tomador||'—'}\n\n📄 Acesse seu comprovante:\n${linkComp}\n\n_AunordMED — Gestão financeira médica_`;
+}
+function atualizarPreviewWpp(){
+  if(!pagandoNota||!pagandoMedico)return;
+  const val=parseFloat(document.getElementById('pg-repasse-edit').value)||0;
+  const dt=document.getElementById('pg-data').value;
+  const token=uid();
+  const msg=gerarMsgWpp(pagandoMedico.nome,pagandoMedico.crm,pagandoNota.tomador,val,dt,pagandoNota.comp,token);
+  document.getElementById('pg-wpp-msg').value=msg;
+  document.getElementById('pg-wpp-msg').dataset.token=token;
+}
+async function confirmarPagamento(enviarWpp){
+  const valEdit=parseFloat(document.getElementById('pg-repasse-edit').value)||0;
+  const dataPag=document.getElementById('pg-data').value;
+  const msg=document.getElementById('pg-wpp-msg').value;
+  const token=document.getElementById('pg-wpp-msg').dataset.token||uid();
+  const btn=enviarWpp?document.getElementById('btn-pg-wpp'):document.getElementById('btn-pg-semwpp');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    // Criar comprovante
+    const mn=pagandoNota.medicos_nota?.find(m=>m.nome===pagandoMedico.nome);
+    await sPost('comprovantes',{token,nf_id:pagandoNota.id,medico_nome:pagandoMedico.nome,medico_crm:pagandoMedico.crm||null,tomador:pagandoNota.tomador,valor_repasse:valEdit,data_pagamento:dataPag||null,competencia:pagandoNota.comp,dados_extras:{nf:pagandoNota.nf,pix:pagandoMedico.chave_pix,tipo_pix:pagandoMedico.tipo_pix}}).catch(()=>{});
+    // Atualizar nota
+    const updateData={status:'Paga ao médico',data_pagamento_medico:dataPag||null,valor_editado_repasse:valEdit,comprovante_token:token,whatsapp_enviado:enviarWpp};
+    await sPatch('notas_fiscais',pagandoNota.id,updateData);
+    // Enviar WhatsApp
+    if(enviarWpp){
+      const tel=pagandoMedico.telefone_whatsapp||pagandoMedico.telefone;
+      if(tel){
+        const ok=await enviarWhatsApp(tel,msg);
+        if(ok){toast('✅ Pago e WhatsApp enviado!','wpp');await sPost('whatsapp_logs',{medico_nome:pagandoMedico.nome,telefone:tel,mensagem:msg.substring(0,500),status:'enviado',nf_id:pagandoNota.id}).catch(()=>{});}
+        else toast('Pago! WhatsApp falhou — verifique a Evolution API.','err');
+      }else{toast('Pago! Médico sem WhatsApp cadastrado.','err');}
+    }else{toast('Pagamento registrado!');}
+    fechar('mo-pagar');await carregarTudo();
+  }catch(e){toast('Erro: '+e.message,'err');}
+  btn.disabled=false;btn.innerHTML=enviarWpp?'💬 Salvar e enviar WhatsApp':'Salvar sem WhatsApp';
+}
+
+// ADIANTAMENTOS
+function abrirAdiantamento(adt=null){
+  editAdt=adt;
+  document.getElementById('mo-adt-tit').textContent=adt?'Editar adiantamento':'Novo adiantamento';
+  document.getElementById('adt-med').innerHTML='<option value="">— selecione —</option>'+medicos.map(m=>`<option value="${m.nome}"${adt?.medico_nome===m.nome?' selected':''}>${m.nome}</option>`).join('');
+  document.getElementById('adt-valor').value=adt?.valor||'';
+  document.getElementById('adt-data').value=adt?.data_adiantamento||new Date().toISOString().split('T')[0];
+  document.getElementById('adt-desc').value=adt?.descricao||'';
+  abrir('mo-adt');
+}
+async function salvarAdiantamento(){
+  const nome=document.getElementById('adt-med').value;
+  const valor=parseFloat(document.getElementById('adt-valor').value);
+  if(!nome||!valor){toast('Preencha médico e valor.','err');return;}
+  const payload={medico_nome:nome,valor,data_adiantamento:document.getElementById('adt-data').value||null,descricao:document.getElementById('adt-desc').value||null,status:'pendente'};
+  try{
+    if(editAdt)await sPatch('adiantamentos',editAdt.id,payload);
+    else await sPost('adiantamentos',payload);
+    toast(editAdt?'Atualizado!':'Adiantamento registrado!');fechar('mo-adt');await carregarTudo();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+function renderAdiantamentos(){
+  const tbody=document.getElementById('tb-adt');
+  if(!adiantamentos.length){tbody.innerHTML=`<tr><td colspan="6"><div class="empty"><div class="empty-ic">💵</div><h4>Nenhum adiantamento</h4><p>Registre adiantamentos feitos aos médicos</p></div></td></tr>`;return;}
+  const tot=adiantamentos.filter(a=>a.status==='pendente').reduce((s,a)=>s+a.valor,0);
+  tbody.innerHTML=adiantamentos.map(a=>`<tr>
+    <td class="mono">${fmtDt(a.data_adiantamento)}</td>
+    <td style="font-weight:500;color:var(--g2)">${a.medico_nome}</td>
+    <td class="mono" style="font-weight:700;color:var(--orange-d)">${brl(a.valor)}</td>
+    <td style="color:var(--gray2)">${a.descricao||'—'}</td>
+    <td><span class="badge ${a.status==='pendente'?'b-emit':'b-pag'}">${a.status==='pendente'?'Pendente':'Descontado'}</span></td>
+    <td style="display:flex;gap:4px;padding-top:6px">
+      <button class="btn btn-ghost btn-xs" onclick='abrirAdiantamento(${JSON.stringify(a).replace(/'/g,"&#39;")})'>✏️</button>
+      ${a.status==='pendente'?`<button class="btn btn-sm btn-outline btn-xs" onclick="marcarAdt('${a.id}')">✓ Descontar</button>`:''}
+      <button class="btn btn-danger btn-xs" onclick="excluir('adiantamentos','${a.id}','Excluir este adiantamento?')">✕</button>
+    </td>
+  </tr>`).join('');
+}
+async function marcarAdt(id){try{await sPatch('adiantamentos',id,{status:'descontado'});toast('Marcado como descontado!');await carregarTudo();}catch(e){toast('Erro','err');}}
+
+// CASHBACK
+function abrirCashback(cb=null){
+  editCb=cb;
+  document.getElementById('mo-cb-tit').textContent=cb?'Editar cashback':'Novo cashback';
+  document.getElementById('cb-med').innerHTML='<option value="">— selecione —</option>'+medicos.map(m=>`<option value="${m.nome}"${cb?.medico_nome===m.nome?' selected':''}>${m.nome}</option>`).join('');
+  document.getElementById('cb-tipo').value=cb?.tipo||'indicacao';
+  document.getElementById('cb-valor').value=cb?.valor||'';
+  document.getElementById('cb-data').value=cb?.data_cashback||new Date().toISOString().split('T')[0];
+  document.getElementById('cb-desc').value=cb?.descricao||'';
+  abrir('mo-cb');
+}
+async function salvarCashback(){
+  const nome=document.getElementById('cb-med').value;
+  const valor=parseFloat(document.getElementById('cb-valor').value);
+  if(!nome||!valor){toast('Preencha médico e valor.','err');return;}
+  const payload={medico_nome:nome,tipo:document.getElementById('cb-tipo').value,valor,data_cashback:document.getElementById('cb-data').value||null,descricao:document.getElementById('cb-desc').value||null,status:'pendente'};
+  try{
+    if(editCb)await sPatch('cashback',editCb.id,payload);
+    else await sPost('cashback',payload);
+    toast(editCb?'Atualizado!':'Cashback registrado!');fechar('mo-cb');await carregarTudo();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+const cbTipos={'indicacao':'🤝 Indicação','reducao_aliquota':'📉 Redução alíquota','primeiro_pagamento':'1️⃣ Primeiro pagamento','outro':'🎁 Outro'};
+function renderCashbacks(){
+  const tbody=document.getElementById('tb-cb');
+  if(!cashbacks.length){tbody.innerHTML=`<tr><td colspan="7"><div class="empty"><div class="empty-ic">🎁</div><h4>Nenhum cashback</h4></div></td></tr>`;return;}
+  tbody.innerHTML=cashbacks.map(c=>`<tr>
+    <td class="mono">${fmtDt(c.data_cashback)}</td>
+    <td style="font-weight:500;color:var(--g2)">${c.medico_nome}</td>
+    <td>${cbTipos[c.tipo]||c.tipo}</td>
+    <td class="mono" style="font-weight:700;color:var(--purple-d)">${brl(c.valor)}</td>
+    <td style="color:var(--gray2)">${c.descricao||'—'}</td>
+    <td><span class="badge ${c.status==='pendente'?'b-pend':'b-pag'}">${c.status==='pendente'?'Pendente':'Pago'}</span></td>
+    <td style="display:flex;gap:4px;padding-top:6px">
+      <button class="btn btn-ghost btn-xs" onclick='abrirCashback(${JSON.stringify(c).replace(/'/g,"&#39;")})'>✏️</button>
+      ${c.status==='pendente'?`<button class="btn btn-purple btn-xs" onclick="marcarCb('${c.id}')">✓ Pago</button>`:''}
+      <button class="btn btn-danger btn-xs" onclick="excluir('cashback','${c.id}','Excluir este cashback?')">✕</button>
+    </td>
+  </tr>`).join('');
+}
+async function marcarCb(id){try{await sPatch('cashback',id,{status:'pago'});toast('Marcado como pago!');await carregarTudo();}catch(e){toast('Erro','err');}}
+
+// EXCLUIR GENÉRICO
+async function excluir(tabela,id,msg){confirmar(msg,async()=>{try{await sDel(tabela,id);toast('Removido.');await carregarTudo();}catch(e){toast('Erro: '+e.message,'err');}});}
+
+// MÉDICOS
+function abrirMedico(m=null){
+  document.getElementById('mo-med-tit').textContent=m?'Editar médico':'Cadastrar médico';
+  window._editMed=m;
+  ['m-nome','m-crm','m-esp','m-email','m-wpp','m-ret','m-pix','m-obs'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('m-pix-tipo').value='cpf';
+  if(m){
+    document.getElementById('m-nome').value=m.nome||'';
+    document.getElementById('m-crm').value=m.crm||'';
+    document.getElementById('m-esp').value=m.especialidade||'';
+    document.getElementById('m-email').value=m.email||'';
+    document.getElementById('m-wpp').value=m.telefone_whatsapp||m.telefone||'';
+    document.getElementById('m-ret').value=m.retencao||'';
+    document.getElementById('m-pix-tipo').value=m.tipo_pix||'cpf';
+    document.getElementById('m-pix').value=m.chave_pix||'';
+    document.getElementById('m-obs').value=m.obs||'';
+  }
+  abrir('mo-med');
+}
+async function salvarMedico(){
+  const nome=document.getElementById('m-nome').value.trim();
+  const ret=parseFloat(document.getElementById('m-ret').value);
+  if(!nome||isNaN(ret)){toast('Preencha nome e % de retenção.','err');return;}
+  const m=window._editMed;
+  const payload={nome,crm:document.getElementById('m-crm').value.trim()||null,especialidade:document.getElementById('m-esp').value.trim()||null,email:document.getElementById('m-email').value.trim()||null,telefone_whatsapp:document.getElementById('m-wpp').value.trim()||null,retencao:ret,tipo_pix:document.getElementById('m-pix-tipo').value,chave_pix:document.getElementById('m-pix').value.trim()||null,obs:document.getElementById('m-obs').value.trim()||null,ativo:true};
+  const btn=document.getElementById('btn-sv-med');btn.disabled=true;btn.innerHTML='<span class="spin"></span>';
+  try{
+    if(m)await sPatch('medicos',m.id,payload);
+    else await sPost('medicos',payload);
+    toast(m?'Atualizado!':'Médico cadastrado!');fechar('mo-med');await carregarTudo();
+  }catch(e){toast('Erro: '+e.message,'err');}
+  btn.disabled=false;btn.textContent='Salvar';
+}
+
+// RENDER
+function renderTudo(){
+  renderKPIs();renderStatusStrip();renderTabela();renderMedCards();renderFiltros();
+  const pend=notas.filter(n=>n.status==='Emitida'||n.status==='Recebida').length;
+  const adtPend=adiantamentos.filter(a=>a.status==='pendente').length;
+  const cbPend=cashbacks.filter(c=>c.status==='pendente').length;
+  document.getElementById('nb-nf').textContent=notas.length;
+  document.getElementById('nb-med').textContent=medicos.length;
+  const bp=document.getElementById('nb-pend');bp.textContent=pend;bp.className='nb'+(pend===0?' ok':'');
+  document.getElementById('nb-adt').textContent=adtPend;
+  document.getElementById('nb-cb').textContent=cbPend;
+}
+function renderKPIs(){
+  const t=notas.reduce((a,n)=>({bruto:a.bruto+n.bruto,recebido:a.recebido+n.recebido,repasse:a.repasse+(n.total_repasse||0),margem:a.margem+n.margem}),{bruto:0,recebido:0,repasse:0,margem:0});
+  const pm=t.recebido>0?t.margem/t.recebido:0;
+  const adtPend=adiantamentos.filter(a=>a.status==='pendente').reduce((s,a)=>s+a.valor,0);
+  const cbPend=cashbacks.filter(c=>c.status==='pendente').reduce((s,c)=>s+c.valor,0);
+  document.getElementById('kpi-grid').innerHTML=[
+    {bar:'#22994D',ic:'#E8F5ED',ico:'💰',lbl:'Total emitido',val:brl(t.bruto),sub:`${notas.length} nota(s)`},
+    {bar:'#1A56DB',ic:'#EBF5FF',ico:'📥',lbl:'Total recebido',val:brl(t.recebido),sub:`Após ${cfg.imposto}% impostos`},
+    {bar:'#D97706',ic:'#FFFBEB',ico:'👨‍⚕️',lbl:'Total repassado',val:brl(t.repasse),sub:'Repasse aos médicos'},
+    {bar:'#22994D',ic:'#F0FFF6',ico:'📈',lbl:'Margem empresa',val:brl(t.margem),sub:pct(pm)+' sobre recebido'},
+    {bar:'#D97706',ic:'#FFFBEB',ico:'💵',lbl:'Adiantamentos pend.',val:brl(adtPend),sub:`${adiantamentos.filter(a=>a.status==='pendente').length} pendente(s)`},
+    {bar:'#7C3AED',ic:'#F5F3FF',ico:'🎁',lbl:'Cashback pend.',val:brl(cbPend),sub:`${cashbacks.filter(c=>c.status==='pendente').length} pendente(s)`},
+  ].map(k=>`<div class="kpi"><div class="kpi-bar" style="background:${k.bar}"></div><div class="kpi-ic" style="background:${k.ic}">${k.ico}</div><div class="kpi-lbl">${k.lbl}</div><div class="kpi-val">${k.val}</div><div class="kpi-sub">${k.sub}</div></div>`).join('');
+}
+function renderStatusStrip(){
+  const em=notas.filter(n=>n.status==='Emitida'),re=notas.filter(n=>n.status==='Recebida'),pa=notas.filter(n=>n.status==='Paga ao médico');
+  document.getElementById('ss-grid').innerHTML=`
+    <div class="ss ss-emit"><div class="ss-n">${em.length}</div><div><div class="ss-lbl">Emitidas</div><div class="ss-sub">${brl(em.reduce((a,n)=>a+n.bruto,0))}</div></div></div>
+    <div class="ss ss-rec"><div class="ss-n">${re.length}</div><div><div class="ss-lbl">Recebidas</div><div class="ss-sub">${brl(re.reduce((a,n)=>a+n.bruto,0))}</div></div></div>
+    <div class="ss ss-pag"><div class="ss-n">${pa.length}</div><div><div class="ss-lbl">Pagas ao médico</div><div class="ss-sub">${brl(pa.reduce((a,n)=>a+n.bruto,0))}</div></div></div>`;
+}
+function renderFiltros(){
+  const comps=[...new Set(notas.map(n=>n.comp).filter(Boolean))].sort();
+  const meds=[...new Set(notas.map(n=>n.nomes_medicos).filter(Boolean))].sort();
+  const fc=document.getElementById('flt-comp'),fm=document.getElementById('flt-med');
+  const cv=fc.value,mv=fm.value;
+  fc.innerHTML='<option value="">Competências</option>'+comps.map(c=>`<option value="${c}"${c===cv?' selected':''}>${fmtMes(c)}</option>`).join('');
+  fm.innerHTML='<option value="">Todos médicos</option>'+medicos.map(m=>`<option value="${m.nome}"${m.nome===mv?' selected':''}>${m.nome}</option>`).join('');
+}
+function renderTabela(){
+  const busca=document.getElementById('busca').value.toLowerCase();
+  const fs=document.getElementById('flt-status').value;
+  const fc2=document.getElementById('flt-comp').value;
+  const fm2=document.getElementById('flt-med').value;
+  const f=notas.filter(n=>(!busca||(n.nf||'').toLowerCase().includes(busca)||(n.tomador||'').toLowerCase().includes(busca))&&(!fs||n.status===fs)&&(!fc2||n.comp===fc2)&&(!fm2||n.nomes_medicos?.includes(fm2)));
+  const tbody=document.getElementById('tb-body');
+  if(!f.length){tbody.innerHTML=`<tr><td colspan="12"><div class="empty"><div class="empty-ic">📄</div><h4>Nenhuma nota</h4><p>Use "+ Nova nota" para registrar</p></div></td></tr>`;return;}
+  tbody.innerHTML=f.map((n,i)=>{
+    const opts=['Emitida','Recebida','Paga ao médico'].map(s=>`<option value="${s}"${n.status===s?' selected':''}>${s}</option>`).join('');
+    const medTags=n.medicos_nota?n.medicos_nota.map(m=>`<span class="tag" style="margin:1px">${m.nome}</span>`).join(' '):(n.nomes_medicos||'—');
+    const wppBtn2=n.medicos_nota?.length>0&&n.status==='Recebida'?n.medicos_nota.map(mn=>`<button class="btn btn-wpp btn-xs" style="margin:1px;font-size:10px" onclick='abrirPagamento(${JSON.stringify(n).replace(/'/g,"&#39;")},"${mn.nome}")'>💬 ${mn.nome.split(' ')[0]}</button>`).join(''):'<span style="color:var(--gray3);font-size:10px">—</span>';
+    return`<tr class="${n.status==='Emitida'?'row-emit':''}">
+      <td class="mono" style="color:var(--gray3)">${i+1}</td>
+      <td class="mono" style="font-weight:600">${n.nf||'—'}</td>
+      <td>${n.tomador||'—'}</td>
+      <td style="max-width:180px;white-space:normal">${medTags}</td>
+      <td class="mono">${fmtMes(n.comp)}</td>
+      <td class="mono" style="font-weight:600">${brl(n.bruto)}</td>
+      <td class="mono" style="color:var(--blue)">${brl(n.recebido)}</td>
+      <td class="mono" style="color:var(--gray2)">${brl(n.total_repasse||0)}</td>
+      <td class="mono" style="color:var(--g3);font-weight:600">${brl(n.margem)}</td>
+      <td><select style="height:26px;font-size:11px;width:130px" onchange="alterarStatus('${n.id}',this.value)">${opts}</select></td>
+      <td style="white-space:normal;min-width:120px">${wppBtn2}</td>
+      <td style="display:flex;gap:4px;padding-top:6px">
+        <button class="btn btn-ghost btn-xs" onclick='abrirNota(${JSON.stringify(n).replace(/'/g,"&#39;")})'>✏️</button>
+        <button class="btn btn-danger btn-xs" onclick="excluir('notas_fiscais','${n.id}','Excluir esta nota?')">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+async function alterarStatus(id,status){try{await sPatch('notas_fiscais',id,{status});await carregarTudo();}catch(e){toast('Erro','err');}}
+
+function renderMedCards(){
+  const grid=document.getElementById('med-cards');
+  if(!medicos.length){grid.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-ic">👨‍⚕️</div><h4>Nenhum médico cadastrado</h4></div>`;return;}
+  grid.innerHTML=medicos.map(m=>{
+    const nm=notas.filter(n=>n.medicos_nota?.some(mn=>mn.nome===m.nome));
+    const tBruto=nm.reduce((a,n)=>{const mn=n.medicos_nota?.find(mn=>mn.nome===m.nome);return a+(mn?.valor_bruto_medico||0);},0);
+    const tRep=nm.reduce((a,n)=>{const mn=n.medicos_nota?.find(mn=>mn.nome===m.nome);return a+(mn?.repasse||0);},0);
+    const cor=avc(m.nome);
+    return`<div class="mc">
+      <div class="mc-hd">
+        <div class="avatar" style="background:${cor}">${ini(m.nome)}</div>
+        <div style="flex:1;min-width:0"><div class="mc-name">${m.nome}</div><div class="mc-crm">${m.crm||'Sem CRM'}${m.especialidade?' · '+m.especialidade:''}</div></div>
+        <span class="ret-tag">${m.retencao}%</span>
+      </div>
+      <div class="mc-bd">
+        <div class="mc-stat"><span class="msl">Notas vinculadas</span><span class="msv">${nm.length}</span></div>
+        <div class="mc-stat"><span class="msl">Bruto médico</span><span class="msv">${brl(tBruto)}</span></div>
+        <div class="mc-stat"><span class="msl">Total repasse</span><span class="msv" style="color:var(--g3)">${brl(tRep)}</span></div>
+        ${m.chave_pix?`<div class="mc-stat"><span class="msl">PIX</span><span class="msv"><span class="pix-tag">${(m.tipo_pix||'pix').toUpperCase()}: ${m.chave_pix}</span></span></div>`:''}
+        ${m.telefone_whatsapp?`<div class="mc-stat"><span class="msl">WhatsApp</span><span class="msv" style="font-family:var(--sans);font-size:11px">+${m.telefone_whatsapp}</span></div>`:''}
+      </div>
+      <div class="mc-ft">
+        <button class="btn btn-ghost btn-xs" onclick='abrirMedico(${JSON.stringify(m).replace(/'/g,"&#39;")})'>✏️ Editar</button>
+        <button class="btn btn-danger btn-xs" onclick="excluir('medicos','${m.id}','Excluir o médico?')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPend(){
+  const aguardRec=notas.filter(n=>n.status==='Emitida');
+  const aguardPag=notas.filter(n=>n.status==='Recebida');
+  const tRec=aguardRec.reduce((a,n)=>a+n.bruto,0);
+  const tPag=aguardPag.reduce((a,n)=>a+(n.total_repasse||0),0);
+  document.getElementById('pend-kpis').innerHTML=`
+    <div class="kpi"><div class="kpi-bar" style="background:var(--orange)"></div><div class="kpi-ic" style="background:var(--orange-l)">⏳</div><div class="kpi-lbl">A receber do tomador</div><div class="kpi-val">${brl(tRec)}</div><div class="kpi-sub">${aguardRec.length} nota(s)</div></div>
+    <div class="kpi"><div class="kpi-bar" style="background:var(--blue)"></div><div class="kpi-ic" style="background:var(--blue-l)">💳</div><div class="kpi-lbl">A pagar aos médicos</div><div class="kpi-val">${brl(tPag)}</div><div class="kpi-sub">${aguardPag.length} nota(s)</div></div>
+    <div class="kpi"><div class="kpi-bar" style="background:var(--purple)"></div><div class="kpi-ic" style="background:var(--purple-l)">💵</div><div class="kpi-lbl">Adiantamentos pend.</div><div class="kpi-val">${brl(adiantamentos.filter(a=>a.status==='pendente').reduce((s,a)=>s+a.valor,0))}</div><div class="kpi-sub">${adiantamentos.filter(a=>a.status==='pendente').length} item(s)</div></div>`;
+  document.getElementById('cnt-rec').textContent=aguardRec.length;
+  document.getElementById('cnt-pag').textContent=aguardPag.length;
+  const tbl=(lista,tipo)=>{
+    if(!lista.length)return`<div class="empty" style="padding:1.5rem"><div class="empty-ic">${tipo==='rec'?'✅':'💚'}</div><h4>Nenhuma pendência</h4></div>`;
+    const cor=tipo==='rec'?'var(--orange-d)':'var(--blue-d)';
+    const ns=tipo==='rec'?'Recebida':'Paga ao médico';
+    return`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="background:var(--g1)">${['NF','Tomador','Médicos','Competência',tipo==='rec'?'A receber':'A pagar','Ação'].map(h=>`<th style="padding:7px 11px;text-align:left;font-size:9px;font-weight:700;color:var(--g6);text-transform:uppercase;letter-spacing:.5px">${h}</th>`).join('')}</tr></thead>
+      <tbody>${lista.map((n,i)=>`<tr style="background:${i%2?'var(--gray6)':'#fff'}">
+        <td style="padding:8px 11px;font-family:var(--mono);font-weight:600">${n.nf||'—'}</td>
+        <td style="padding:8px 11px">${n.tomador||'—'}</td>
+        <td style="padding:8px 11px;font-size:11px">${n.nomes_medicos||'—'}</td>
+        <td style="padding:8px 11px;font-family:var(--mono)">${fmtMes(n.comp)}</td>
+        <td style="padding:8px 11px;font-family:var(--mono);font-weight:700;color:${cor}">${brl(tipo==='rec'?n.bruto:n.total_repasse||0)}</td>
+        <td style="padding:8px 11px">
+          ${tipo==='rec'
+            ?`<button class="btn btn-sm" style="background:${cor};color:#fff;font-size:11px;padding:4px 10px" onclick="alterarStatus('${n.id}','${ns}').then(()=>{renderPend();renderTudo()})">✓ Marcar recebido</button>`
+            :n.medicos_nota?.map(mn=>`<button class="btn btn-sm" style="background:${cor};color:#fff;font-size:10px;padding:3px 8px;margin:1px" onclick='abrirPagamento(${JSON.stringify(n).replace(/'/g,"&#39;")},"${mn.nome}")'>💬 ${mn.nome.split(' ')[0]}</button>`).join('')||`<button class="btn btn-sm" style="background:${cor};color:#fff;font-size:11px;padding:4px 10px" onclick="alterarStatus('${n.id}','${ns}').then(()=>{renderPend();renderTudo()})">✓ Pagar</button>`
+          }
+        </td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  };
+  document.getElementById('pend-rec-wrap').innerHTML=tbl(aguardRec,'rec');
+  document.getElementById('pend-pag-wrap').innerHTML=tbl(aguardPag,'pag');
+}
+
+function renderRelatorio(){
+  const mes=document.getElementById('rel-mes').value;
+  const todosNomes=medicos.map(m=>m.nome);
+  const faturaram=new Set();
+  notas.forEach(n=>{if(mes&&n.comp!==mes)return;n.medicos_nota?.forEach(mn=>faturaram.add(mn.nome));});
+  const naoFaturaram=todosNomes.filter(n=>!faturaram.has(n));
+  const periodo=mes?`em ${fmtMes(mes)}`:'(todos os períodos)';
+  document.getElementById('rel-fatura').innerHTML=`
+    <div class="rel-card-fat">
+      <div class="rfh green">✅ Faturaram ${periodo} (${faturaram.size})</div>
+      ${faturaram.size?[...faturaram].map(n=>{
+        const m=medicos.find(x=>x.nome===n);
+        const nfs=notas.filter(nf=>(!mes||nf.comp===mes)&&nf.medicos_nota?.some(mn=>mn.nome===n));
+        const tot=nfs.reduce((a,nf)=>{const mn=nf.medicos_nota?.find(mn=>mn.nome===n);return a+(mn?.valor_bruto_medico||0);},0);
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--gray6);font-size:12px">
+          <div><div style="font-weight:500;color:var(--g2)">${n}</div><div style="font-size:10px;color:var(--gray3)">${m?.crm||''}</div></div>
+          <div style="text-align:right"><div class="mono" style="font-weight:700">${brl(tot)}</div><div style="font-size:10px;color:var(--gray3)">${nfs.length} nota(s)</div></div>
+        </div>`;
+      }).join(''):`<div class="empty" style="padding:1.5rem"><p>Nenhum neste período</p></div>`}
+    </div>
+    <div class="rel-card-fat">
+      <div class="rfh red">❌ Não faturaram ${periodo} (${naoFaturaram.length})</div>
+      ${naoFaturaram.length?naoFaturaram.map(n=>{
+        const m=medicos.find(x=>x.nome===n);
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 14px;border-bottom:1px solid var(--gray6);font-size:12px">
+          <div><div style="font-weight:500;color:var(--red-d)">${n}</div><div style="font-size:10px;color:var(--gray3)">${m?.crm||''}</div></div>
+          <button class="btn btn-wpp btn-xs" onclick="enviarLembrete('${n}','${m?.telefone_whatsapp||''}')">💬 Lembrete</button>
+        </div>`;
+      }).join(''):`<div class="empty" style="padding:1.5rem"><div class="empty-ic">🎉</div><h4>Todos faturaram!</h4></div>`}
+    </div>`;
+}
+
+async function enviarLembrete(nome,tel){
+  if(!tel){toast('Médico sem WhatsApp cadastrado.','err');return;}
+  const msg=`🏥 *AunordMED Financeiro*\n\nOlá, Dr(a). *${nome}*!\n\nIdentificamos que ainda não há notas fiscais lançadas no período atual.\n\nCaso já tenha emitido alguma NF, entre em contato conosco.\n\n_AunordMED — Gestão financeira médica_`;
+  const ok=await enviarWhatsApp(tel,msg);
+  if(ok)toast('Lembrete enviado!','wpp');
+  else toast('Falha no envio. Configure a Evolution API.','err');
+}
+
+function renderResumos(){
+  const byMed={};
+  notas.forEach(n=>(n.medicos_nota||[]).forEach(mn=>{if(!byMed[mn.nome])byMed[mn.nome]={count:0,bruto:0,repasse:0};byMed[mn.nome].count++;byMed[mn.nome].bruto+=mn.valor_bruto_medico||0;byMed[mn.nome].repasse+=mn.repasse||0;}));
+  const ml=Object.entries(byMed).sort((a,b)=>b[1].bruto-a[1].bruto);
+  const tbl=(rows,cols)=>`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:var(--g1)">${cols.map((c,i)=>`<th style="padding:7px 11px;text-align:${i===0?'left':'right'};font-size:9px;font-weight:700;color:var(--g6);text-transform:uppercase;letter-spacing:.4px">${c}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div>`;
+  document.getElementById('res-med').innerHTML=ml.length?tbl(ml.map(([n,v],i)=>`<tr style="background:${i%2?'var(--g8)':'#fff'}"><td style="padding:8px 11px;font-weight:500;color:var(--g3)">${n}</td><td style="padding:8px 11px;text-align:right;font-family:var(--mono)">${v.count}</td><td style="padding:8px 11px;text-align:right;font-family:var(--mono)">${brl(v.bruto)}</td><td style="padding:8px 11px;text-align:right;font-family:var(--mono);color:var(--g3);font-weight:600">${brl(v.repasse)}</td></tr>`).join(''),['Médico','NFs','Bruto','Repasse']):`<div class="empty" style="padding:2rem"><p>Nenhum dado</p></div>`;
+  const byComp={};
+  notas.forEach(n=>{const k=n.comp||'—';if(!byComp[k])byComp[k]={count:0,bruto:0,recebido:0,margem:0};byComp[k].count++;byComp[k].bruto+=n.bruto;byComp[k].recebido+=n.recebido;byComp[k].margem+=n.margem;});
+  const cl=Object.entries(byComp).sort((a,b)=>a[0].localeCompare(b[0]));
+  document.getElementById('res-comp').innerHTML=cl.length?tbl(cl.map(([c,v],i)=>`<tr style="background:${i%2?'var(--g8)':'#fff'}"><td style="padding:8px 11px;font-weight:500;color:var(--g3)">${fmtMes(c)}</td><td style="padding:8px 11px;text-align:right;font-family:var(--mono)">${v.count}</td><td style="padding:8px 11px;text-align:right;font-family:var(--mono)">${brl(v.bruto)}</td><td style="padding:8px 11px;text-align:right;font-family:var(--mono)">${brl(v.recebido)}</td><td style="padding:8px 11px;text-align:right;font-family:var(--mono);color:var(--g3);font-weight:600">${brl(v.margem)}</td></tr>`).join(''),['Competência','NFs','Bruto','Recebido','Margem']):`<div class="empty" style="padding:2rem"><p>Nenhum dado</p></div>`;
+}
+
+function renderCharts(){
+  const byComp={};
+  notas.forEach(n=>{const k=fmtMes(n.comp)||'S/D';if(!byComp[k])byComp[k]={bruto:0,recebido:0,repasse:0,margem:0};byComp[k].bruto+=n.bruto;byComp[k].recebido+=n.recebido;byComp[k].repasse+=n.total_repasse||0;byComp[k].margem+=n.margem;});
+  const labels=Object.keys(byComp).sort();const G=v=>Math.round(v);
+  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:'Inter',size:10},boxWidth:9,boxHeight:9}}}};
+  if(chBar)chBar.destroy();
+  chBar=new Chart(document.getElementById('ch-bar'),{type:'bar',data:{labels,datasets:[{label:'Bruto',data:labels.map(l=>G(byComp[l].bruto)),backgroundColor:'#145C30'},{label:'Recebido',data:labels.map(l=>G(byComp[l].recebido)),backgroundColor:'#22994D'},{label:'Repasse',data:labels.map(l=>G(byComp[l].repasse)),backgroundColor:'#94A3B8'}]},options:{...base,scales:{x:{ticks:{font:{family:'Inter',size:10}},grid:{display:false}},y:{ticks:{font:{family:'JetBrains Mono',size:9},callback:v=>'R$'+(v/1000).toFixed(0)+'k'},grid:{color:'#F1F5F9'}}}}});
+  const tot=notas.reduce((a,n)=>({rep:a.rep+(n.total_repasse||0),mar:a.mar+n.margem,imp:a.imp+n.bruto*cfg.imposto/100}),{rep:0,mar:0,imp:0});
+  if(chPizza)chPizza.destroy();
+  chPizza=new Chart(document.getElementById('ch-pizza'),{type:'doughnut',data:{labels:['Repasse médicos','Margem empresa','Impostos'],datasets:[{data:[G(tot.rep),G(tot.mar),G(tot.imp)],backgroundColor:['#94A3B8','#22994D','#1A56DB'],borderWidth:3,borderColor:'#fff'}]},options:{...base,cutout:'62%',plugins:{legend:{position:'bottom',labels:{font:{family:'Inter',size:10},boxWidth:9,boxHeight:9}}}}});
+  if(chLinha)chLinha.destroy();
+  chLinha=new Chart(document.getElementById('ch-linha'),{type:'line',data:{labels,datasets:[{label:'Margem (R$)',data:labels.map(l=>G(byComp[l].margem)),borderColor:'#22994D',backgroundColor:'rgba(34,153,77,.08)',borderWidth:2.5,fill:true,tension:.35,pointBackgroundColor:'#22994D',pointRadius:4}]},options:{...base,plugins:{legend:{display:false}},scales:{x:{ticks:{font:{family:'Inter',size:10}},grid:{display:false}},y:{ticks:{font:{family:'JetBrains Mono',size:9},callback:v=>'R$'+(v/1000).toFixed(1)+'k'},grid:{color:'#F1F5F9'}}}}});
+}
+
+function exportarExcel(){
+  if(!notas.length){toast('Nenhuma nota.','err');return;}
+  const rows=[['Nº NF','Tomador','Médicos','Competência','Emissão','Bruto','Recebido','Repasse','Margem','% Margem','Status','Data Pag.','WPP']];
+  notas.forEach(n=>rows.push([n.nf,n.tomador,n.nomes_medicos,fmtMes(n.comp),fmtDt(n.emissao),+n.bruto.toFixed(2),+n.recebido.toFixed(2),+(n.total_repasse||0).toFixed(2),+n.margem.toFixed(2),+(n.pct_margem*100).toFixed(2),n.status,fmtDt(n.data_pagamento_medico),n.whatsapp_enviado?'Sim':'Não']));
+  const ws=XLSX.utils.aoa_to_sheet(rows);const wb2=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb2,ws,'NFs');
+  if(adiantamentos.length){const r2=[['Data','Médico','Valor','Descrição','Status']];adiantamentos.forEach(a=>r2.push([fmtDt(a.data_adiantamento),a.medico_nome,+a.valor.toFixed(2),a.descricao,a.status]));XLSX.utils.book_append_sheet(wb2,XLSX.utils.aoa_to_sheet(r2),'Adiantamentos');}
+  if(cashbacks.length){const r3=[['Data','Médico','Tipo','Valor','Descrição','Status']];cashbacks.forEach(c=>r3.push([fmtDt(c.data_cashback),c.medico_nome,c.tipo,+c.valor.toFixed(2),c.descricao,c.status]));XLSX.utils.book_append_sheet(wb2,XLSX.utils.aoa_to_sheet(r3),'Cashback');}
+  XLSX.writeFile(wb2,'aunordmed_financeiro.xlsx');toast('Exportado!');
+}
+
+let comprovantesLista=[];
+async function carregarComprovantes(){
+  try{comprovantesLista=await sGet('comprovantes','order=criado_em.desc');}catch(e){comprovantesLista=[];}
+}
+function renderComprovantes(){
+  const busca=document.getElementById('busca-comp')?.value.toLowerCase()||'';
+  const fs=document.getElementById('flt-comp-status')?.value||'';
+  const f=comprovantesLista.filter(c=>(!busca||c.medico_nome?.toLowerCase().includes(busca)||c.medico_crm?.toLowerCase().includes(busca))&&(!fs||(fs==='enviado'&&c.whatsapp_enviado)||(fs==='pendente'&&!c.whatsapp_enviado)));
+  document.getElementById('nb-comp').textContent=comprovantesLista.length;
+  const tbody=document.getElementById('tb-comp');
+  if(!f.length){tbody.innerHTML=`<tr><td colspan="10"><div class="empty"><div class="empty-ic">🧾</div><h4>Nenhum comprovante</h4><p>São gerados automaticamente ao cadastrar notas</p></div></td></tr>`;return;}
+  tbody.innerHTML=f.map((c,i)=>{
+    const link=`${cfg.baseUrl}?token=${c.token}`;
+    const med=medicos.find(m=>m.nome===c.medico_nome);
+    const tel=med?.telefone_whatsapp||med?.telefone||'';
+    return`<tr>
+      <td class="mono" style="color:var(--gray3)">${i+1}</td>
+      <td style="font-weight:500;color:var(--g2)">${c.medico_nome||'—'}</td>
+      <td class="mono">${c.dados_extras?.nf||'—'}</td>
+      <td>${c.tomador||'—'}</td>
+      <td class="mono">${fmtMes(c.competencia)}</td>
+      <td class="mono" style="font-weight:600;color:var(--g2)">${brl(c.valor_repasse)}</td>
+      <td class="mono">${fmtDt(c.data_pagamento)}</td>
+      <td><button class="btn btn-ghost btn-xs" onclick="navigator.clipboard.writeText('${link}').then(()=>toast('Link copiado!'))">🔗 Copiar</button><button class="btn btn-ghost btn-xs" style="margin-left:4px" onclick="window.open('${link}','_blank')">↗ Abrir</button></td>
+      <td>${tel?`<button class="btn btn-wpp btn-xs" onclick="enviarComprovante('${c.token}','${c.medico_nome}','${tel}',${c.valor_repasse},'${c.data_pagamento||''}','${c.competencia||''}','${c.tomador||''}')">💬 Enviar</button>`:`<span style="color:var(--gray3);font-size:10px">Sem tel.</span>`}</td>
+      <td><span class="badge ${c.whatsapp_enviado?'b-pag':'b-emit'}">${c.whatsapp_enviado?'✓ Enviado':'Pendente'}</span></td>
+      <td><button class="btn btn-danger btn-xs" onclick="excluirComp('${c.id}')">✕</button></td>
+    </tr>`;
+  }).join('');
+}
+
+async function excluirComp(id){
+  if(!confirm('Excluir este comprovante? O link deixará de funcionar.'))return;
+  try{
+    await sDel('comprovantes',id);
+    toast('Comprovante excluído.');
+    await carregarComprovantes();renderComprovantes();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+async function excluirComp(id){
+  if(!confirm('Excluir este comprovante? O link deixará de funcionar.'))return;
+  try{
+    await sDel('comprovantes',id);
+    toast('Comprovante excluído.');
+    await carregarComprovantes();renderComprovantes();
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+async function enviarComprovante(token,nome,tel,valor,data,comp,tomador){
+  const link=`${cfg.baseUrl}?token=${token}`;
+  const msg=`🏥 *AunordMED Financeiro*\n\nOlá, Dr(a). *${nome}*!\n\nSeu comprovante de repasse está disponível.\n\n💰 *Valor:* ${brl(valor)}\n📅 *Data:* ${fmtDt(data)}\n🏢 *Tomador:* ${tomador}\n📅 *Competência:* ${fmtMes(comp)}\n\n📄 Acesse seu comprovante:\n${link}\n\n_AunordMED — Gestão financeira médica_`;
+  
+  // Abrir modal de edição da mensagem
+  const msgEdit=prompt('Edite a mensagem antes de enviar:',msg);
+  if(msgEdit===null)return;
+  
+  if(cfg.wppUrl&&cfg.wppKey){
+    const ok=await enviarWhatsApp(tel,msgEdit);
+    if(ok){
+      toast('WhatsApp enviado!','wpp');
+      const comp2=comprovantesLista.find(c=>c.token===token);
+      if(comp2){await sPatch('comprovantes',comp2.id,{whatsapp_enviado:true}).catch(()=>{});}
+      await carregarComprovantes();renderComprovantes();
+    }else toast('Falha no envio.','err');
+  }else{
+    window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msgEdit)}`,'_blank');
+    const comp2=comprovantesLista.find(c=>c.token===token);
+    if(comp2){await sPatch('comprovantes',comp2.id,{whatsapp_enviado:true}).catch(()=>{});}
+    await carregarComprovantes();renderComprovantes();
   }
 }
 
-function gerarMensagem(){
-  return `🏥 *AunordMED Financeiro*\n\nOlá, Dr(a). *${comp.medico_nome}*!\n\nSeu comprovante de repasse referente à competência *${fmtMes(comp.competencia)}* está disponível.\n\n💰 *Valor:* R$ ${brl(comp.valor_repasse)}\n📅 *Data:* ${fmtDt(comp.data_pagamento)}\n🏢 *Tomador:* ${comp.tomador||'—'}\n\n📄 Acesse seu comprovante:\n${window.location.href}\n\n_AunordMED — Gestão financeira médica_`;
+function handleExtratoFile(e){e.preventDefault();const f=e.dataTransfer.files[0];if(f)processarExtrato(f);}
+function processarExtrato(file){
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const text=e.target.result;
+    const linhas=text.split('\n').filter(l=>l.trim());
+    const resultados=[];
+    let cruzados=0,naoEncontrados=0;
+    linhas.forEach(linha=>{
+      // Detectar valores monetários no extrato
+      const valorMatch=linha.match(/[\d]+[.,][\d]{2}/g);
+      if(!valorMatch)return;
+      const valor=parseFloat(valorMatch[0].replace(',','.'));
+      if(valor<10)return;
+      // Cruzar com notas
+      const nfMatch=notas.find(n=>{
+        const recebido=parseFloat((n.recebido||0).toFixed(2));
+        return Math.abs(recebido-valor)<0.02&&n.status==='Emitida';
+      });
+      if(nfMatch){
+        resultados.push({linha:linha.trim(),valor,nf:nfMatch.nf,status:'encontrada',id:nfMatch.id});
+        cruzados++;
+      }
+    });
+    document.getElementById('extrato-resultado').innerHTML=`
+      <div style="background:var(--g7);border:1px solid var(--g6);border-radius:var(--radius-lg);padding:16px;margin-bottom:12px">
+        <div style="font-size:14px;font-weight:600;color:var(--g2);margin-bottom:8px">📊 Resultado do cruzamento</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+          <div style="background:#fff;border-radius:var(--radius);padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--g2)">${cruzados}</div><div style="font-size:11px;color:var(--gray3)">NFs encontradas</div></div>
+          <div style="background:#fff;border-radius:var(--radius);padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--orange)">${notas.filter(n=>n.status==='Emitida').length-cruzados}</div><div style="font-size:11px;color:var(--gray3)">Ainda pendentes</div></div>
+          <div style="background:#fff;border-radius:var(--radius);padding:10px;text-align:center"><div style="font-size:20px;font-weight:700;color:var(--blue)">${linhas.length}</div><div style="font-size:11px;color:var(--gray3)">Linhas no extrato</div></div>
+        </div>
+      </div>
+      ${resultados.length?`<div style="font-size:13px;font-weight:600;color:var(--gray1);margin-bottom:8px">NFs identificadas no extrato:</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:var(--g1)"><th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--g6)">NF</th><th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--g6)">Valor</th><th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--g6)">Linha do extrato</th><th style="padding:8px 12px;text-align:left;font-size:9px;font-weight:700;color:var(--g6)">Ação</th></tr></thead>
+        <tbody>${resultados.map(r=>`<tr style="border-bottom:1px solid var(--gray6)"><td style="padding:8px 12px;font-family:var(--mono);font-weight:600">${r.nf}</td><td style="padding:8px 12px;font-family:var(--mono);color:var(--g2)">R$ ${brl(r.valor)}</td><td style="padding:8px 12px;font-size:11px;color:var(--gray2);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.linha}</td><td style="padding:8px 12px"><button class="btn btn-sm" style="background:var(--g3);color:#fff;font-size:11px;padding:4px 10px" onclick="marcarRecebida('${r.id}')">✓ Marcar recebida</button></td></tr>`).join('')}</tbody>
+      </table>`:
+      '<div style="text-align:center;padding:20px;color:var(--gray3);font-size:13px">Nenhuma NF identificada automaticamente. Verifique o formato do arquivo.</div>'}`;
+  };
+  reader.readAsText(file,'UTF-8');
+}
+async function marcarRecebida(id){
+  try{await sPatch('notas_fiscais',id,{status:'Recebida'});toast('NF marcada como recebida!');await carregarTudo();renderComprovantes();}
+  catch(e){toast('Erro: '+e.message,'err');}
 }
 
+async function init(){
+  document.getElementById('tb-date').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('rel-mes').value=new Date().toISOString().substring(0,7);
+  carregarCfg();await Promise.all([carregarTudo(),carregarComprovantes()]);renderCharts();
+}
 init();
 </script>
 </body>
