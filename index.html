@@ -359,7 +359,7 @@ tr.row-pend{background:#FEF2F2}tr.row-pend:hover{background:#FEE2E2}
       </div>
       <div class="cfg-sec">
         <h4>URL base dos comprovantes</h4>
-        <input type="text" id="cfg-base-url" placeholder="https://aunordmedfinanceiro.netlify.app" style="margin-top:6px">
+        <input type="text" id="cfg-base-url" placeholder="https://aunordmed-lgtm.github.io/aunordmed-financeiro/comprovante.html" style="margin-top:6px">
         <div class="fhint" style="margin-top:4px">Usado para gerar o link enviado por WhatsApp</div>
         <div style="margin-top:8px"><button class="btn btn-primary" onclick="salvarCfg()">Salvar</button></div>
       </div>
@@ -508,7 +508,7 @@ async function sDel(t,id){const r=await fetch(`${SUPA_URL}/rest/v1/${t}?id=eq.${
 let notas=[],medicos=[],adiantamentos=[],cashbacks=[];
 let editNota=null,editMed=null,editAdt=null,editCb=null,medSel=[];
 let pagandoNota=null,pagandoMedico=null;
-let cfg={imposto:6.15,retencao:13,nome:'',cnpj:'',wppUrl:'',wppKey:'',wppInst:'aunordmed',baseUrl:'https://aunordmedfinanceiro.netlify.app'};
+let cfg={imposto:6.15,retencao:13,nome:'',cnpj:'',wppUrl:'',wppKey:'',wppInst:'aunordmed',baseUrl:'https://aunordmed-lgtm.github.io/aunordmed-financeiro/comprovante.html'};
 let chBar,chPizza,chLinha;
 
 const brl=v=>Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -572,7 +572,7 @@ function salvarCfg(){
   cfg.wppUrl=document.getElementById('cfg-wpp-url').value.trim();
   cfg.wppKey=document.getElementById('cfg-wpp-key').value.trim();
   cfg.wppInst=document.getElementById('cfg-wpp-inst').value.trim()||'aunordmed';
-  cfg.baseUrl=document.getElementById('cfg-base-url').value.trim()||'https://aunordmedfinanceiro.netlify.app';
+  cfg.baseUrl=document.getElementById('cfg-base-url').value.trim()||'https://aunordmed-lgtm.github.io/aunordmed-financeiro/comprovante.html';
   localStorage.setItem('am_cfg4',JSON.stringify(cfg));
   toast('Configurações salvas!');
 }
@@ -706,7 +706,7 @@ function abrirPagamento(nf,medicoNome){
   abrir('mo-pagar');
 }
 function gerarMsgWpp(medicoNome,medCrm,tomador,valorRepasse,dataPag,comp,token){
-  const linkComp=`${cfg.baseUrl}/comprovante.html?token=${token}`;
+  const linkComp=`${cfg.baseUrl}?token=${token}`;
   return `🏥 *AunordMED Financeiro*\n\nOlá, Dr(a). *${medicoNome}*!\n\nSeu repasse referente à competência *${fmtMes(comp)||'—'}* foi processado.\n\n💰 *Valor:* ${brl(valorRepasse)}\n📅 *Data:* ${fmtDt(dataPag)}\n🏢 *Tomador:* ${tomador||'—'}\n\n📄 Acesse seu comprovante:\n${linkComp}\n\n_AunordMED — Gestão financeira médica_`;
 }
 function atualizarPreviewWpp(){
