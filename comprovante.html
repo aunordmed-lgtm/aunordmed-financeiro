@@ -112,6 +112,46 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
 .footer{text-align:center;padding:16px;font-size:11px;color:var(--gray3)}
 .footer strong{color:var(--gray2)}
 
+/* DASHBOARD PREMIUM */
+/* ═══ DASHBOARD ═══ */
+@keyframes fadeUp{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
+@keyframes lineIn{from{stroke-dashoffset:2000}to{stroke-dashoffset:0}}
+@keyframes dotPop{0%{r:0;opacity:0}80%{r:7}100%{r:5;opacity:1}}
+@keyframes barIn{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes pulseDot{0%,100%{opacity:.5;r:3}50%{opacity:1;r:5}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+.dsh{margin-bottom:22px;border-radius:18px;overflow:hidden;background:#020c06;border:1px solid rgba(74,222,128,.15)}
+.dsh-3d{position:relative;height:210px;overflow:hidden;background:#020c06}
+.dsh-3d canvas{width:100%!important;height:210px!important;display:block}
+.dsh-3d-fade{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 45%,#020c06 100%);pointer-events:none;z-index:2}
+.dsh-kpis-top{position:absolute;top:14px;left:0;right:0;display:grid;grid-template-columns:repeat(3,1fr);z-index:3;pointer-events:none}
+.dsh-kt{text-align:center;animation:fadeUp .5s ease both}
+.dsh-kt:nth-child(2){animation-delay:.08s}
+.dsh-kt:nth-child(3){animation-delay:.16s}
+.dsh-kt-lbl{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:3px;font-weight:600}
+.dsh-kt-val{font-size:17px;font-weight:700;font-family:'JetBrains Mono',monospace;color:#4ade80;line-height:1}
+.dsh-kt-sub{font-size:9px;color:rgba(255,255,255,.22);margin-top:3px}
+.dsh-id{position:absolute;bottom:16px;left:0;right:0;text-align:center;z-index:3;pointer-events:none;animation:fadeUp .5s .3s ease both;opacity:0;animation-fill-mode:forwards}
+.dsh-id-eye{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(74,222,128,.4);margin-bottom:3px}
+.dsh-id-name{font-size:15px;font-weight:700;color:#fff}
+.dsh-id-per{font-size:10px;color:rgba(255,255,255,.28);margin-top:2px}
+.dsh-body{display:grid;grid-template-columns:1fr 1fr;background:#020c06}
+.dsh-col{padding:18px 20px;border-top:1px solid rgba(74,222,128,.08)}
+.dsh-col:first-child{border-right:1px solid rgba(74,222,128,.08)}
+.dsh-col-title{font-size:9px;letter-spacing:1.8px;text-transform:uppercase;color:rgba(74,222,128,.5);margin-bottom:13px;font-weight:600}
+.dsh-hrow{display:flex;align-items:center;gap:7px;margin-bottom:7px;animation:fadeUp .4s ease both}
+.dsh-hrow:last-of-type{margin-bottom:0}
+.dsh-hlbl{font-size:11px;color:#fff;width:46px;text-align:right;flex-shrink:0;font-weight:500}
+.dsh-htrack{flex:1;background:rgba(255,255,255,.04);border-radius:20px;height:15px;position:relative;overflow:hidden}
+.dsh-hfill{height:100%;border-radius:20px;position:absolute;left:0;top:0;width:0;transition:width 1.1s cubic-bezier(.34,1.4,.64,1);background:linear-gradient(90deg,#052e16,#16a34a,#4ade80)}
+.dsh-hrep{height:100%;border-radius:20px;position:absolute;left:0;top:0;width:0;transition:width 1.1s cubic-bezier(.34,1.4,.64,1) .1s;background:linear-gradient(90deg,rgba(74,222,128,.2),rgba(74,222,128,.1))}
+.dsh-hval{font-size:10px;font-family:'JetBrains Mono',monospace;color:#4ade80;width:62px;flex-shrink:0;font-weight:600}
+.dsh-lgd{display:flex;gap:10px;margin-top:11px;padding-top:9px;border-top:1px solid rgba(74,222,128,.07);font-size:10px;color:rgba(255,255,255,.3)}
+.dsh-lgd span{display:flex;align-items:center;gap:4px}
+.dsh-lgd i{width:10px;height:4px;border-radius:2px;display:inline-block}
+.dsh-lwrap{position:relative;height:82px}
+.dsh-ltip{position:absolute;background:#020c06;border:1px solid rgba(74,222,128,.35);color:#fff;border-radius:8px;padding:5px 10px;font-size:10px;font-family:'JetBrains Mono',monospace;pointer-events:none;transform:translate(-50%,-150%);white-space:nowrap;opacity:0;transition:opacity .15s;z-index:20}
+.dsh-xax{display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.28);margin-top:3px}
 /* ══ PRINT ══════════════════════════════════════════════════ */
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -197,6 +237,54 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
 
   <!-- RESUMO MÊS -->
   <div class="resumo-grid" id="resumo-grid"></div>
+
+        <!-- DASHBOARD FATURAMENTO -->
+  <div class="dsh" id="dash-card" style="display:none">
+    <div class="dsh-3d">
+      <canvas id="dsh-3d"></canvas>
+      <div class="dsh-3d-fade"></div>
+      <div class="dsh-kpis-top">
+        <div class="dsh-kt">
+          <div class="dsh-kt-lbl">Total bruto</div>
+          <div class="dsh-kt-val" id="dk-bruto">—</div>
+          <div class="dsh-kt-sub">acumulado</div>
+        </div>
+        <div class="dsh-kt">
+          <div class="dsh-kt-lbl">Total repasse</div>
+          <div class="dsh-kt-val" id="dk-repasse" style="color:#86efac">—</div>
+          <div class="dsh-kt-sub">após retenção</div>
+        </div>
+        <div class="dsh-kt">
+          <div class="dsh-kt-lbl">NFs vinculadas</div>
+          <div class="dsh-kt-val" id="dk-nfs" style="color:#93c5fd">—</div>
+          <div class="dsh-kt-sub">total de notas</div>
+        </div>
+      </div>
+      <div class="dsh-id">
+        <div class="dsh-id-eye">AunordMED · Faturamento</div>
+        <div class="dsh-id-name" id="dash-nome-med">—</div>
+        <div class="dsh-id-per" id="dash-periodo">—</div>
+      </div>
+    </div>
+    <div class="dsh-body">
+      <div class="dsh-col">
+        <div class="dsh-col-title">Faturamento mensal</div>
+        <div id="dash-bars"></div>
+        <div class="dsh-lgd">
+          <span><i style="background:linear-gradient(90deg,#052e16,#4ade80)"></i>Bruto</span>
+          <span><i style="background:rgba(74,222,128,.25)"></i>Repasse</span>
+        </div>
+      </div>
+      <div class="dsh-col">
+        <div class="dsh-col-title">Evolução do repasse</div>
+        <div class="dsh-lwrap">
+          <svg id="dash-lsvg" style="width:100%;height:82px;overflow:visible" viewBox="0 0 240 82" preserveAspectRatio="none"></svg>
+          <div class="dsh-ltip" id="dash-ltip"></div>
+        </div>
+        <div class="dsh-xax" id="dash-xaxis"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- HISTÓRICO -->
   <div class="hist-card">
@@ -353,6 +441,7 @@ function renderComprovante(){
   renderResumo();
   renderFiltroMes();
   renderHistorico();
+  renderDash();
 }
 
 function renderResumo(){
@@ -392,11 +481,154 @@ function renderHistorico(){
   document.getElementById('hist-total-val').textContent=`R$ ${brl(totalRep)}`;
 }
 
-function copiarLink(){
-  navigator.clipboard.writeText(window.location.href)
-    .then(()=>toast('Link copiado!'))
-    .catch(()=>{const e=document.createElement('textarea');e.value=window.location.href;document.body.appendChild(e);e.select();document.execCommand('copy');document.body.removeChild(e);toast('Link copiado!');});
+var _dshRaf=null,_dshR=null;
+
+function initDsh3D(meses){
+  var cv=document.getElementById('dsh-3d');
+  if(!cv||!window.THREE)return;
+  if(_dshRaf){cancelAnimationFrame(_dshRaf);_dshRaf=null;}
+  if(_dshR){_dshR.dispose();_dshR=null;}
+  var W=cv.offsetWidth||340,H=210;
+  cv.width=W*devicePixelRatio;cv.height=H*devicePixelRatio;
+  var R=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});
+  R.setSize(W,H);R.setPixelRatio(devicePixelRatio);R.setClearColor(0x000000,0);
+  _dshR=R;
+  var S=new THREE.Scene();
+  var CAM=new THREE.PerspectiveCamera(42,W/H,.1,100);
+  CAM.position.set(0,3.8,10);CAM.lookAt(0,0,0);
+  var maxB=Math.max.apply(null,meses.map(function(m){return m.bruto;}));
+  if(!maxB)maxB=1;
+  var n=meses.length,sp=2.1,off=-(n-1)*sp/2;
+  var bars=[];
+  meses.forEach(function(m,i){
+    var h=Math.max((m.bruto/maxB)*4,.2);
+    var hr=Math.max((m.repasse/maxB)*4,.1);
+    var x=off+i*sp;
+    // Barra bruto
+    var g=new THREE.BoxGeometry(.82,h,.82);
+    var mat=new THREE.MeshStandardMaterial({color:0x16a34a,emissive:0x052e16,emissiveIntensity:.55,metalness:.65,roughness:.28});
+    var b=new THREE.Mesh(g,mat);
+    b.position.set(x,-2,0);b.userData.finalY=(h/2)-2;b.scale.y=.001;
+    S.add(b);bars.push({m:b,delay:i*.12});
+    // Borda wireframe
+    var eg=new THREE.EdgesGeometry(g);
+    var em=new THREE.LineBasicMaterial({color:0x4ade80,transparent:true,opacity:.18});
+    var el=new THREE.LineSegments(eg,em);
+    el.position.copy(b.position);S.add(el);
+    // Barra repasse (frente)
+    var g2=new THREE.BoxGeometry(.52,hr,.52);
+    var m2=new THREE.MeshStandardMaterial({color:0x4ade80,emissive:0x14532d,emissiveIntensity:.65,metalness:.5,roughness:.2,transparent:true,opacity:.88});
+    var b2=new THREE.Mesh(g2,m2);
+    b2.position.set(x,-2,.52);b2.userData.finalY=(hr/2)-2;b2.scale.y=.001;
+    S.add(b2);bars.push({m:b2,delay:i*.12+.06});
+  });
+  // Grid
+  var grid=new THREE.GridHelper(18,18,0x14532d,0x052e16);
+  grid.position.y=-2;S.add(grid);
+  // Luzes
+  S.add(new THREE.AmbientLight(0xffffff,.3));
+  var dl=new THREE.DirectionalLight(0x4ade80,.9);dl.position.set(5,9,6);S.add(dl);
+  var dl2=new THREE.DirectionalLight(0x22d3ee,.35);dl2.position.set(-5,6,-4);S.add(dl2);
+  var pl=new THREE.PointLight(0x4ade80,1.6,14);pl.position.set(0,5,0);S.add(pl);
+  // Partículas
+  var pg=new THREE.BufferGeometry();
+  var pc=80,pp=new Float32Array(pc*3);
+  for(var i=0;i<pc*3;i++)pp[i]=(Math.random()-.5)*15;
+  pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+  var pts=new THREE.Points(pg,new THREE.PointsMaterial({color:0x4ade80,size:.055,transparent:true,opacity:.38}));
+  S.add(pts);
+  var t=0,startTime=performance.now();
+  function loop(){
+    _dshRaf=requestAnimationFrame(loop);
+    t=(performance.now()-startTime)/1000;
+    // Câmera orbita
+    CAM.position.x=Math.sin(t*.22)*2.2;
+    CAM.position.z=9.5+Math.cos(t*.17)*1.6;
+    CAM.position.y=3.8+Math.sin(t*.14)*.55;
+    CAM.lookAt(0,0,0);
+    // Barras sobem com delay
+    bars.forEach(function(bd){
+      var elapsed=t-bd.delay;
+      if(elapsed>0&&bd.m.scale.y<1){
+        var prog=Math.min(elapsed/1.2,1);
+        var ease=1-Math.pow(1-prog,3);
+        bd.m.scale.y=Math.max(ease,.001);
+        bd.m.position.y=bd.m.userData.finalY-(bd.m.userData.finalY+2)*(1-ease);
+      }
+    });
+    // Partículas sobem
+    var pa=pts.geometry.attributes.position;
+    for(var i=0;i<pc;i++){pa.array[i*3+1]+=.007;if(pa.array[i*3+1]>5)pa.array[i*3+1]=-4;}
+    pa.needsUpdate=true;
+    pl.intensity=1.4+Math.sin(t*1.8)*.4;
+    R.render(S,CAM);
+  }
+  loop();
 }
+
+function renderDash(){
+  if(!notas||!notas.length)return;
+  document.getElementById('dash-card').style.display='block';
+  var totalBruto=0,totalRepasse=0,countNFs=0,porMes={};
+  notas.forEach(function(n){
+    var mn=n.medicos_nota&&n.medicos_nota.find(function(m){return m.nome===comp.medico_nome;});
+    if(!mn)return;
+    countNFs++;
+    var br=mn.valor_bruto_medico||0,ret=mn.retencao_individual||13;
+    var rep=mn.repasse||(br*(1-ret/100));
+    totalBruto+=br;totalRepasse+=rep;
+    var mes=n.comp||'';
+    if(mes){if(!porMes[mes])porMes[mes]={label:fmtMes(mes),bruto:0,repasse:0};porMes[mes].bruto+=br;porMes[mes].repasse+=rep;}
+  });
+  document.getElementById('dk-bruto').textContent='R$ '+brl(totalBruto);
+  document.getElementById('dk-repasse').textContent='R$ '+brl(totalRepasse);
+  document.getElementById('dk-nfs').textContent=countNFs;
+  document.getElementById('dash-nome-med').textContent=comp.medico_nome||'—';
+  var meses=Object.keys(porMes).sort().map(function(k){return porMes[k];});
+  if(meses.length)document.getElementById('dash-periodo').textContent=
+    meses.length===1?meses[0].label:(meses[0].label+' – '+meses[meses.length-1].label);
+  // Barras horizontais
+  var maxB=Math.max.apply(null,meses.map(function(m){return m.bruto;}).concat([1]));
+  var delay=0;
+  document.getElementById('dash-bars').innerHTML=meses.map(function(m,i){
+    var pB=Math.max(Math.round((m.bruto/maxB)*100),4);
+    var pR=Math.max(Math.round((m.repasse/maxB)*100),2);
+    return '<div class="dsh-hrow" style="animation-delay:'+((i*.08)+.2)+'s"><div class="dsh-hlbl">'+m.label+'</div><div class="dsh-htrack"><div class="dsh-hfill" style="width:0" data-w="'+pB+'"></div><div class="dsh-hrep" style="width:0" data-w="'+pR+'"></div></div><div class="dsh-hval">R$'+brl(m.bruto)+'</div></div>';
+  }).join('');
+  requestAnimationFrame(function(){requestAnimationFrame(function(){
+    document.querySelectorAll('.dsh-hfill,.dsh-hrep').forEach(function(el){el.style.width=el.dataset.w+'%';});
+  });});
+  // Linha SVG animada
+  var svg=document.getElementById('dash-lsvg');
+  if(meses.length>=2){
+    var W=240,H=82,PX=12,PY=10;
+    var vals=meses.map(function(m){return m.repasse;});
+    var minV=Math.min.apply(null,vals),maxV=Math.max.apply(null,vals),rng=maxV-minV||1;
+    var xs=meses.map(function(_,i){return PX+i*((W-PX*2)/(meses.length-1));});
+    var ys=vals.map(function(v){return PY+(1-(v-minV)/rng)*(H-PY*2);});
+    var d='M'+xs[0]+','+ys[0];
+    for(var i=1;i<xs.length;i++){var cx=(xs[i-1]+xs[i])/2;d+=' C'+cx+','+ys[i-1]+' '+cx+','+ys[i]+' '+xs[i]+','+ys[i];}
+    var area=d+' L'+xs[xs.length-1]+','+H+' L'+xs[0]+','+H+' Z';
+    svg.innerHTML='<defs><linearGradient id="dlg4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4ade80" stop-opacity=".28"/><stop offset="100%" stop-color="#4ade80" stop-opacity="0"/></linearGradient></defs>'
+      +'<path d="'+area+'" fill="url(#dlg4)"/>'
+      +'<path d="'+d+'" fill="none" stroke="rgba(74,222,128,.15)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>'
+      +'<path d="'+d+'" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2000" stroke-dashoffset="2000" style="animation:lineIn 1.4s .5s ease both forwards"/>'
+      +xs.map(function(x,i){return '<circle cx="'+x+'" cy="'+ys[i]+'" r="0" fill="#020c06" stroke="#4ade80" stroke-width="2.5" style="cursor:pointer;animation:dotPop .4s '+(.5+i*.1)+'s ease both forwards" onmouseenter="dShowTip(event,\''+meses[i].label+'\',\'R$'+brl(meses[i].repasse)+'\')" onmouseleave="dHideTip()"/>';}).join('');
+    document.getElementById('dash-xaxis').innerHTML=meses.map(function(m){return '<span>'+m.label+'</span>';}).join('');
+  } else {
+    svg.innerHTML='<text x="120" y="44" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.2)">Apenas 1 mês</text>';
+  }
+  if(window.THREE)setTimeout(function(){initDsh3D(meses);},80);
+}
+function dShowTip(e,mes,val){
+  var tip=document.getElementById('dash-ltip');
+  var wr=e.target.closest('.dsh-lwrap').getBoundingClientRect();
+  tip.innerHTML='<b style="color:#4ade80">'+mes+'</b> '+val;
+  tip.style.left=((e.clientX-wr.left)/wr.width*100)+'%';
+  tip.style.top=(e.clientY-wr.top-10)+'px';
+  tip.style.opacity='1';
+}
+function dHideTip(){document.getElementById('dash-ltip').style.opacity='0';}
 
 function imprimirComp(){
   document.title=`AunordMED - Comprovante #${pad(numSeq)} - ${comp?.medico_nome||''}`;
@@ -425,5 +657,6 @@ async function enviarWhatsApp(){
 
 init();
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </body>
 </html>
