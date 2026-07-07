@@ -19,7 +19,6 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:100vh;padding:24px 16px}
 
-/* LOADING */
 .lov{position:fixed;inset:0;background:#fff;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:14px;color:var(--gray2)}
 .lov.hide{display:none}
 .spin-big{width:36px;height:36px;border:3px solid var(--g6);border-top-color:var(--g4);border-radius:50%;animation:spin .7s linear infinite}
@@ -27,7 +26,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
 
 .wrapper{max-width:700px;margin:0 auto}
 
-/* HEADER */
 .header-card{background:linear-gradient(135deg,var(--g1) 0%,var(--g3) 100%);border-radius:var(--radius-xl);padding:28px 32px 24px;margin-bottom:16px;position:relative;overflow:hidden}
 .header-card::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.05)}
 .header-card::after{content:'';position:absolute;bottom:-80px;left:-30px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.03)}
@@ -45,7 +43,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
 .medico-esp{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
 .status-pill{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:99px;font-size:11px;font-weight:600;margin-top:8px;background:rgba(61,179,104,.2);color:#6EE7A0;border:1px solid rgba(61,179,104,.3)}
 
-/* VALOR PRINCIPAL */
 .valor-card{background:var(--surface);border-radius:var(--radius-xl);padding:24px 28px;margin-bottom:12px;box-shadow:var(--sh);border:1px solid var(--border)}
 .vc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
 .vc-label{font-size:11px;font-weight:600;color:var(--gray3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
@@ -61,14 +58,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
 .pix-lbl{font-size:10px;font-weight:600;color:var(--g3);text-transform:uppercase;letter-spacing:.4px}
 .pix-val{font-size:13px;font-weight:600;color:var(--g2);font-family:var(--mono)}
 
-/* RESUMO */
 .resumo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
 .rg-item{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;box-shadow:var(--sh)}
 .rg-lbl{font-size:10px;font-weight:600;color:var(--gray3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .rg-val{font-size:17px;font-weight:700;font-family:var(--mono);color:var(--gray0);line-height:1.2}
 .rg-sub{font-size:10px;color:var(--gray3);margin-top:3px}
 
-/* HISTÓRICO */
 .hist-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden;margin-bottom:12px;box-shadow:var(--sh)}
 .hist-hd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}
 .hist-hd h3{font-size:13px;font-weight:600;color:var(--gray0);display:flex;align-items:center;gap:7px}
@@ -89,7 +84,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
 .hist-total strong{font-family:var(--mono);font-weight:700;color:var(--g1);font-size:16px}
 .hist-empty{text-align:center;padding:28px;color:var(--gray3);font-size:13px}
 
-/* AÇÕES (só tela, não imprime) */
 .acoes-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:18px 22px;margin-bottom:16px;box-shadow:var(--sh)}
 .acoes-title{font-size:11px;font-weight:700;color:var(--gray3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
 .acoes-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px}
@@ -102,18 +96,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
 .link-box{background:var(--gray6);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;gap:10px}
 .link-box span{flex:1;font-size:11px;font-family:var(--mono);color:var(--gray2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* TOAST */
 .toast{position:fixed;bottom:20px;right:20px;background:var(--g1);color:#fff;padding:11px 18px;border-radius:var(--radius-lg);font-size:13px;font-weight:500;z-index:999;transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);border-left:4px solid var(--g5);box-shadow:var(--sh-md)}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.wpp{background:#075E54;border-left-color:#25D366}
 .toast.err{background:#7F1D1D;border-left-color:#DC2626}
 
-/* FOOTER */
 .footer{text-align:center;padding:16px;font-size:11px;color:var(--gray3)}
 .footer strong{color:var(--gray2)}
 
-/* DASHBOARD PREMIUM */
-/* ═══ DASHBOARD ═══ */
 @keyframes fadeUp{0%{opacity:0;transform:translateY(12px)}100%{opacity:1;transform:translateY(0)}}
 @keyframes lineIn{from{stroke-dashoffset:2000}to{stroke-dashoffset:0}}
 @keyframes dotPop{0%{r:0;opacity:0}80%{r:7}100%{r:5;opacity:1}}
@@ -152,7 +142,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
 .dsh-lwrap{position:relative;height:82px}
 .dsh-ltip{position:absolute;background:#020c06;border:1px solid rgba(74,222,128,.35);color:#fff;border-radius:8px;padding:5px 10px;font-size:10px;font-family:'JetBrains Mono',monospace;pointer-events:none;transform:translate(-50%,-150%);white-space:nowrap;opacity:0;transition:opacity .15s;z-index:20}
 .dsh-xax{display:flex;justify-content:space-between;font-size:9px;color:rgba(255,255,255,.28);margin-top:3px}
-/* ══ PRINT ══════════════════════════════════════════════════ */
 @media print{
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   body{background:#fff;padding:0;margin:0;font-size:12px}
@@ -167,14 +156,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
   .resumo-grid{margin-bottom:10px;gap:8px}
   .hist-table th,.hist-table td{padding:7px 12px}
   .footer{margin-top:10px;border-top:1px solid #E5E7EB;padding-top:10px}
-
-  /* Rodapé de impressão */
   .print-footer{display:flex!important;justify-content:space-between;align-items:center;padding:12px 0 0;margin-top:12px;border-top:2px solid var(--g6);font-size:10px;color:var(--gray3)}
   .print-footer .pf-logo{font-size:13px;font-weight:700;color:var(--g2)}
   .print-footer .pf-logo span{color:var(--g4)}
   .print-footer .pf-info{text-align:right}
-
-  /* Marca d'água sutil */
   .header-card::before,.header-card::after{display:none}
 }
 .print-footer{display:none}
@@ -192,7 +177,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
 
 <div class="wrapper" id="wrapper" style="display:none">
 
-  <!-- HEADER -->
   <div class="header-card">
     <div class="hc-top">
       <div class="logo-area">
@@ -215,7 +199,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
     </div>
   </div>
 
-  <!-- VALOR -->
   <div class="valor-card">
     <div class="vc-header">
       <div>
@@ -235,10 +218,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
     </div>
   </div>
 
-  <!-- RESUMO MÊS -->
   <div class="resumo-grid" id="resumo-grid"></div>
 
-        <!-- DASHBOARD FATURAMENTO -->
   <div class="dsh" id="dash-card" style="display:none">
     <div class="dsh-3d">
       <canvas id="dsh-3d"></canvas>
@@ -279,7 +260,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
     </div>
   </div>
 
-  <!-- HISTÓRICO -->
   <div class="hist-card">
     <div class="hist-hd">
       <h3>📋 Histórico de notas fiscais</h3>
@@ -296,7 +276,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
     </div>
   </div>
 
-  <!-- AÇÕES (não aparece na impressão) -->
   <div class="acoes-card">
     <div class="acoes-title">Compartilhar comprovante</div>
     <div class="acoes-row">
@@ -313,7 +292,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--gray0);min-height:
     </div>
   </div>
 
-  <!-- RODAPÉ DE IMPRESSÃO -->
   <div class="print-footer">
     <div>
       <div class="pf-logo">Aunord<span>MED</span> Financeiro</div>
@@ -360,23 +338,18 @@ async function init(){
 
   if(!token){mostrarDemo();return;}
   try{
-    // Buscar comprovante
     const comps=await sGet('comprovantes',`token=eq.${token}&limit=1`);
     if(!comps||!comps.length){mostrarErro('Comprovante não encontrado.');return;}
     comp=comps[0];
 
-    // Incrementar visualizações
     sPatch('comprovantes',comp.id,{visualizacoes:(comp.visualizacoes||0)+1}).catch(()=>{});
 
-    // Buscar médico
     const meds=await sGet('medicos',`nome=eq.${encodeURIComponent(comp.medico_nome)}&limit=1`).catch(()=>[]);
     medico=meds[0]||null;
 
-    // Buscar todas as notas do médico para histórico
     const todasNotas=await sGet('notas_fiscais','order=criado_em.asc').catch(()=>[]);
     notas=todasNotas.filter(n=>n.medicos_nota?.some(mn=>mn.nome===comp.medico_nome)||n.nomes_medicos?.includes(comp.medico_nome));
 
-    // Calcular número sequencial: quantos comprovantes este médico tem até este
     const todosComps=await sGet('comprovantes',`medico_nome=eq.${encodeURIComponent(comp.medico_nome)}&order=criado_em.asc`).catch(()=>[]);
     const idx=todosComps.findIndex(c=>c.token===token);
     numSeq=idx>=0?idx+1:1;
@@ -497,33 +470,27 @@ function initDsh3D(meses){
     var h=Math.max((m.bruto/maxB)*4,.2);
     var hr=Math.max((m.repasse/maxB)*4,.1);
     var x=off+i*sp;
-    // Barra bruto
     var g=new THREE.BoxGeometry(.82,h,.82);
     var mat=new THREE.MeshStandardMaterial({color:0x16a34a,emissive:0x052e16,emissiveIntensity:.55,metalness:.65,roughness:.28});
     var b=new THREE.Mesh(g,mat);
     b.position.set(x,-2,0);b.userData.finalY=(h/2)-2;b.scale.y=.001;
     S.add(b);bars.push({m:b,delay:i*.12});
-    // Borda wireframe
     var eg=new THREE.EdgesGeometry(g);
     var em=new THREE.LineBasicMaterial({color:0x4ade80,transparent:true,opacity:.18});
     var el=new THREE.LineSegments(eg,em);
     el.position.copy(b.position);S.add(el);
-    // Barra repasse (frente)
     var g2=new THREE.BoxGeometry(.52,hr,.52);
     var m2=new THREE.MeshStandardMaterial({color:0x4ade80,emissive:0x14532d,emissiveIntensity:.65,metalness:.5,roughness:.2,transparent:true,opacity:.88});
     var b2=new THREE.Mesh(g2,m2);
     b2.position.set(x,-2,.52);b2.userData.finalY=(hr/2)-2;b2.scale.y=.001;
     S.add(b2);bars.push({m:b2,delay:i*.12+.06});
   });
-  // Grid
   var grid=new THREE.GridHelper(18,18,0x14532d,0x052e16);
   grid.position.y=-2;S.add(grid);
-  // Luzes
   S.add(new THREE.AmbientLight(0xffffff,.3));
   var dl=new THREE.DirectionalLight(0x4ade80,.9);dl.position.set(5,9,6);S.add(dl);
   var dl2=new THREE.DirectionalLight(0x22d3ee,.35);dl2.position.set(-5,6,-4);S.add(dl2);
   var pl=new THREE.PointLight(0x4ade80,1.6,14);pl.position.set(0,5,0);S.add(pl);
-  // Partículas
   var pg=new THREE.BufferGeometry();
   var pc=80,pp=new Float32Array(pc*3);
   for(var i=0;i<pc*3;i++)pp[i]=(Math.random()-.5)*15;
@@ -534,12 +501,10 @@ function initDsh3D(meses){
   function loop(){
     _dshRaf=requestAnimationFrame(loop);
     t=(performance.now()-startTime)/1000;
-    // Câmera orbita
     CAM.position.x=Math.sin(t*.22)*2.2;
     CAM.position.z=9.5+Math.cos(t*.17)*1.6;
     CAM.position.y=3.8+Math.sin(t*.14)*.55;
     CAM.lookAt(0,0,0);
-    // Barras sobem com delay
     bars.forEach(function(bd){
       var elapsed=t-bd.delay;
       if(elapsed>0&&bd.m.scale.y<1){
@@ -549,7 +514,6 @@ function initDsh3D(meses){
         bd.m.position.y=bd.m.userData.finalY-(bd.m.userData.finalY+2)*(1-ease);
       }
     });
-    // Partículas sobem
     var pa=pts.geometry.attributes.position;
     for(var i=0;i<pc;i++){pa.array[i*3+1]+=.007;if(pa.array[i*3+1]>5)pa.array[i*3+1]=-4;}
     pa.needsUpdate=true;
@@ -580,9 +544,7 @@ function renderDash(){
   var meses=Object.keys(porMes).sort().map(function(k){return porMes[k];});
   if(meses.length)document.getElementById('dash-periodo').textContent=
     meses.length===1?meses[0].label:(meses[0].label+' – '+meses[meses.length-1].label);
-  // Barras horizontais
   var maxB=Math.max.apply(null,meses.map(function(m){return m.bruto;}).concat([1]));
-  var delay=0;
   document.getElementById('dash-bars').innerHTML=meses.map(function(m,i){
     var pB=Math.max(Math.round((m.bruto/maxB)*100),4);
     var pR=Math.max(Math.round((m.repasse/maxB)*100),2);
@@ -591,42 +553,53 @@ function renderDash(){
   requestAnimationFrame(function(){requestAnimationFrame(function(){
     document.querySelectorAll('.dsh-hfill,.dsh-hrep').forEach(function(el){el.style.width=el.dataset.w+'%';});
   });});
-  // Linha SVG animada
+
+  // Linha SVG animada — só executa se os elementos existirem no HTML atual
   var svg=document.getElementById('dash-lsvg');
-  if(meses.length>=2){
-    var W=240,H=82,PX=12,PY=10;
-    var vals=meses.map(function(m){return m.repasse;});
-    var minV=Math.min.apply(null,vals),maxV=Math.max.apply(null,vals),rng=maxV-minV||1;
-    var xs=meses.map(function(_,i){return PX+i*((W-PX*2)/(meses.length-1));});
-    var ys=vals.map(function(v){return PY+(1-(v-minV)/rng)*(H-PY*2);});
-    var d='M'+xs[0]+','+ys[0];
-    for(var i=1;i<xs.length;i++){var cx=(xs[i-1]+xs[i])/2;d+=' C'+cx+','+ys[i-1]+' '+cx+','+ys[i]+' '+xs[i]+','+ys[i];}
-    var area=d+' L'+xs[xs.length-1]+','+H+' L'+xs[0]+','+H+' Z';
-    svg.innerHTML='<defs><linearGradient id="dlg4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4ade80" stop-opacity=".28"/><stop offset="100%" stop-color="#4ade80" stop-opacity="0"/></linearGradient></defs>'
-      +'<path d="'+area+'" fill="url(#dlg4)"/>'
-      +'<path d="'+d+'" fill="none" stroke="rgba(74,222,128,.15)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>'
-      +'<path d="'+d+'" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2000" stroke-dashoffset="2000" style="animation:lineIn 1.4s .5s ease both forwards"/>'
-      +xs.map(function(x,i){return '<circle cx="'+x+'" cy="'+ys[i]+'" r="0" fill="#020c06" stroke="#4ade80" stroke-width="2.5" style="cursor:pointer;animation:dotPop .4s '+(.5+i*.1)+'s ease both forwards" onmouseenter="dShowTip(event,\''+meses[i].label+'\',\'R$'+brl(meses[i].repasse)+'\')" onmouseleave="dHideTip()"/>';}).join('');
-    document.getElementById('dash-xaxis').innerHTML=meses.map(function(m){return '<span>'+m.label+'</span>';}).join('');
-  } else {
-    svg.innerHTML='<text x="120" y="44" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.2)">Apenas 1 mês</text>';
+  if(svg){
+    if(meses.length>=2){
+      var W=240,H=82,PX=12,PY=10;
+      var vals=meses.map(function(m){return m.repasse;});
+      var minV=Math.min.apply(null,vals),maxV=Math.max.apply(null,vals),rng=maxV-minV||1;
+      var xs=meses.map(function(_,i){return PX+i*((W-PX*2)/(meses.length-1));});
+      var ys=vals.map(function(v){return PY+(1-(v-minV)/rng)*(H-PY*2);});
+      var d='M'+xs[0]+','+ys[0];
+      for(var i=1;i<xs.length;i++){var cx=(xs[i-1]+xs[i])/2;d+=' C'+cx+','+ys[i-1]+' '+cx+','+ys[i]+' '+xs[i]+','+ys[i];}
+      var area=d+' L'+xs[xs.length-1]+','+H+' L'+xs[0]+','+H+' Z';
+      svg.innerHTML='<defs><linearGradient id="dlg4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4ade80" stop-opacity=".28"/><stop offset="100%" stop-color="#4ade80" stop-opacity="0"/></linearGradient></defs>'
+        +'<path d="'+area+'" fill="url(#dlg4)"/>'
+        +'<path d="'+d+'" fill="none" stroke="rgba(74,222,128,.15)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>'
+        +'<path d="'+d+'" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="2000" stroke-dashoffset="2000" style="animation:lineIn 1.4s .5s ease both forwards"/>'
+        +xs.map(function(x,i){return '<circle cx="'+x+'" cy="'+ys[i]+'" r="0" fill="#020c06" stroke="#4ade80" stroke-width="2.5" style="cursor:pointer;animation:dotPop .4s '+(.5+i*.1)+'s ease both forwards" onmouseenter="dShowTip(event,\''+meses[i].label+'\',\'R$'+brl(meses[i].repasse)+'\')" onmouseleave="dHideTip()"/>';}).join('');
+      var xax=document.getElementById('dash-xaxis');
+      if(xax)xax.innerHTML=meses.map(function(m){return '<span>'+m.label+'</span>';}).join('');
+    } else {
+      svg.innerHTML='<text x="120" y="44" text-anchor="middle" font-size="11" fill="rgba(255,255,255,.2)">Apenas 1 mês</text>';
+    }
   }
   if(window.THREE)setTimeout(function(){initDsh3D(meses);},80);
 }
 function dShowTip(e,mes,val){
   var tip=document.getElementById('dash-ltip');
-  var wr=e.target.closest('.dsh-lwrap').getBoundingClientRect();
+  if(!tip)return;
+  var wrEl=e.target.closest('.dsh-lwrap');
+  if(!wrEl)return;
+  var wr=wrEl.getBoundingClientRect();
   tip.innerHTML='<b style="color:#4ade80">'+mes+'</b> '+val;
   tip.style.left=((e.clientX-wr.left)/wr.width*100)+'%';
   tip.style.top=(e.clientY-wr.top-10)+'px';
   tip.style.opacity='1';
 }
-function dHideTip(){document.getElementById('dash-ltip').style.opacity='0';}
+function dHideTip(){var tip=document.getElementById('dash-ltip');if(tip)tip.style.opacity='0';}
 
 function imprimirComp(){
   document.title=`AunordMED - Comprovante #${pad(numSeq)} - ${comp?.medico_nome||''}`;
   window.print();
   setTimeout(()=>{document.title='AunordMED — Comprovante de Repasse';},1000);
+}
+
+function copiarLink(){
+  navigator.clipboard.writeText(window.location.href).then(()=>toast('Link copiado!')).catch(()=>toast('Erro ao copiar link.','err'));
 }
 
 async function enviarWhatsApp(){
